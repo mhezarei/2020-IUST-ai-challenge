@@ -126,16 +126,14 @@ class AI(RealtimeAI):
 			if self.game_state == 0:  # decision
 				state = self.calculate_state()
 				self.record.append(state)
-				action = []
 				if random.random() < self.agent.epsilon:
-					action, self.current_ammo_mat = self.get_action('random')
-					print("random action " + str(action))
+					self.curr_action, self.current_ammo_mat = self.get_action('random')
+					print("random action " + str(self.curr_action))
 				else:
-					action, self.current_ammo_mat = self.get_action('predict', state)
-					print("predicted action " + str(len(action)) + " " + str(action))
-				assert len(action) != 0, "selected action is length 0!"
-				self.curr_action = action
-				self.record.append(action)
+					self.curr_action, self.current_ammo_mat = self.get_action('predict', state)
+					print("predicted action " + str(len(self.curr_action)) + " " + str(self.curr_action))
+				assert len(self.curr_action) != 0, "selected action is length 0!"
+				self.record.append(self.curr_action)
 				self.game_state = 1
 				self.stage += 1
 			elif self.game_state == 1:  # we have finished the transition
@@ -150,11 +148,6 @@ class AI(RealtimeAI):
 					self.record.append(0)
 				
 				# training the NN
-				# print((np.array(self.record[0]),
-				#        np.array(self.record[1]),
-				#        np.array(self.record[2]),
-				#        np.array([self.record[3]]),
-				#        np.array([self.record[4]])))
 				self.agent.train_short_memory(np.array(self.record[0]),
 				                              np.array(self.record[1]),
 				                              np.array(self.record[2]),
@@ -162,27 +155,19 @@ class AI(RealtimeAI):
 				                              np.array([self.record[4]]))
 				
 				# append saving to memory
-				print("after is " + str(self.record))
-				if len(self.record) != 0:
-					print("YESSSSSSSSSSSSSSSSSSSSSSSSSSSS")
-					self.agent.memory.append((np.array(self.record[0]),
-					                          np.array(self.record[1]),
-					                          np.array(self.record[2]),
-					                          np.array([self.record[3]]),
-					                          np.array([self.record[4]])))
-				else:
-					print("NOOOOOOOOOOOOOOOOOOOOOO")
+				self.agent.memory.append((np.array(self.record[0]),
+				                          np.array(self.record[1]),
+				                          np.array(self.record[2]),
+				                          np.array([self.record[3]]),
+				                          np.array([self.record[4]])))
 				self.record = []
 				self.game_state = 0
-				print("HEHEHEEHEHEHEHEHEH")
 		
 		elif self.stage == 1:  # select materials for bullets and put them in BLD
 			self.warehouse_agent_move(forward=True)
 			if base.c_area[wagent.position] == ECell.Material:
 				material_type = base.warehouse.materials[wagent.position].type
-				if material_type in self.current_ammo_mat.keys() and wagent.materials_bag[material_type] < \
-						self.current_ammo_mat[
-							material_type]:
+				if material_type in self.current_ammo_mat.keys() and wagent.materials_bag[material_type] < self.current_ammo_mat[material_type]:
 					self.warehouse_agent_pick_material()
 			elif base.c_area[wagent.position] == ECell.BacklineDelivery:
 				self.warehouse_agent_put_material()
@@ -199,6 +184,8 @@ class AI(RealtimeAI):
 			if fagent.position == Position(7) and base.factory.machines[fagent.position].status == MachineStatus.Idle:
 				self.factory_agent_put_material(
 					desired_ammo=AmmoType(int(self.curr_action[fagent.position.index - 7])))
+				if len(self.curr_action) == 1:
+					self.stage = 7
 				self.stage += 1
 			else:
 				self.factory_agent_move(forward=True)
@@ -207,6 +194,8 @@ class AI(RealtimeAI):
 			if fagent.position == Position(8) and base.factory.machines[fagent.position].status == MachineStatus.Idle:
 				self.factory_agent_put_material(
 					desired_ammo=AmmoType(int(self.curr_action[fagent.position.index - 7])))
+				if len(self.curr_action) == 2:
+					self.stage = 6
 				self.stage += 1
 			else:
 				self.factory_agent_move(forward=True)

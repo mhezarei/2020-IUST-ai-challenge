@@ -9,7 +9,7 @@ import sys
 from chillin_client import GameClient
 
 # project imports
-from first import AI
+from trying_everything import AI
 from ks.models import World
 
 
