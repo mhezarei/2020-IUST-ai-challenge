@@ -1,0 +1,130 @@
+{
+    "area": {
+        "length": 10
+    },
+
+    "agents": {
+        "Warehouse": { "position": 0 },	
+        "Factory": { "position": 6 },
+
+        "c_materials_bag_capacity": 15,
+        "c_ammos_bag_capacity": 5
+    },
+
+    "frontline_delivery": {
+        "position": 0,
+
+        "c_delivery_duration": 8
+    },
+
+    "warehouse": {
+        "materials": [
+            { "position": 1, "type": "Powder", "c_capacity": 15 },
+            { "position": 2, "type": "Iron", "c_capacity": 5 },
+            { "position": 3, "type": "Carbon", "c_capacity": 5 },
+            { "position": 4, "type": "Gold", "c_capacity": 2 },
+            { "position": 5, "type": "Shell", "c_capacity": 6 }
+        ],
+
+        "c_materials_reload_duration": 50
+    },
+
+    "backline_delivery": {
+        "position": 6
+    },
+
+    "factory": {
+        "machine_positions": [ 7, 8, 9 ],
+
+        "c_mixture_formulas": {
+            "RifleBullet": { "Powder": 1, "Iron": 1, "Carbon": 1 },
+            "TankShell": { "Powder": 2, "Shell": 2 },
+            "HMGBullet": { "Powder": 1, "Iron": 2, "Carbon": 2 },
+            "MortarShell": { "Powder": 2, "Shell": 1 },
+            "GoldenTankShell": { "Powder": 3, "Gold": 2, "Shell": 1 }
+        },
+
+        "c_construction_durations": {
+            "RifleBullet": 4,
+            "TankShell": 10,
+            "HMGBullet": 4,
+            "MortarShell": 6,
+            "GoldenTankShell": 30
+        },
+
+        "c_ammo_box_sizes": {
+            "RifleBullet": 75,
+            "TankShell": 5,
+            "HMGBullet": 150,
+            "MortarShell": 10,
+            "GoldenTankShell": 2
+        }
+    },
+
+    "units": {
+        "Soldier": {
+            "c_individual_health": 150,
+            "c_individual_damage": 20,
+            "c_damage_distribution": {
+                "Soldier": 0.6,
+                "Tank": 0,
+                "HeavyMachineGunner": 0.1,
+                "Mortar": 0.3,
+                "GoldenTank": 0
+            },
+            "c_reload_duration": 3
+        },
+
+        "Tank": {
+            "c_individual_health": 500,
+            "c_individual_damage": 100,
+            "c_damage_distribution": {
+                "Soldier": 0.2,
+                "Tank": 0.5,
+                "HeavyMachineGunner": 0.1,
+                "Mortar": 0.1,
+                "GoldenTank": 0.1
+            },
+            "c_reload_duration": 15
+        },
+
+        "HeavyMachineGunner": {
+            "c_individual_health": 400,
+            "c_individual_damage": 20,
+            "c_damage_distribution": {
+                "Soldier": 0.4,
+                "Tank": 0.0,
+                "HeavyMachineGunner": 0.2,
+                "Mortar": 0.4,
+                "GoldenTank": 0
+            },
+            "c_reload_duration": 0
+        },
+
+        "Mortar": {
+            "c_individual_health": 300,
+            "c_individual_damage": 80,
+            "c_damage_distribution": {
+                "Soldier": 0.2,
+                "Tank": 0.3,
+                "HeavyMachineGunner": 0.2,
+                "Mortar": 0.2,
+                "GoldenTank": 0.1
+            },
+            "c_reload_duration": 7
+        },
+
+        "GoldenTank": {
+            "c_individual_health": 1000,
+            "c_individual_damage": 2000,
+            "c_damage_distribution": {
+                "Soldier": 0.1,
+                "Tank": 0.3,
+                "HeavyMachineGunner": 0.1,
+                "Mortar": 0.2,
+                "GoldenTank": 0.3
+            },
+            "c_reload_duration": 25
+        }
+    }
+}

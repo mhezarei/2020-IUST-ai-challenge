@@ -1,0 +1,30 @@
+{
+    "max_cycles": 300,
+
+    "units": {
+        "Soldier": {
+            "count": 6,
+            "ammo_count": 50
+        },
+
+        "Tank": {
+            "count": 3,
+            "ammo_count": 0
+        },
+
+        "HeavyMachineGunner": {
+            "count": 2,
+            "ammo_count": 0
+        },
+
+        "Mortar": {
+            "count": 15,
+            "ammo_count": 0
+        },
+
+        "GoldenTank": {
+            "count": 0,
+            "ammo_count": 0
+        }
+    }
+}

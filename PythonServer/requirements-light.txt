@@ -1,0 +1,3 @@
+chillin-server==2.3.0
+koala-serializer==0.8.0
+pygame==1.9.6
