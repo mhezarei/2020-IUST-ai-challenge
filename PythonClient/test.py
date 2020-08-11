@@ -29,6 +29,6 @@ import threading
 import threading
 
 
-print(len(sorted(list(set(product([i for i in range(5)], repeat=3)))) + sorted(
+print((sorted(list(set(product([i for i in range(5)], repeat=3)))) + sorted(
 			list(set(product([i for i in range(5)], repeat=2)))) + sorted(
 			list(set(product([i for i in range(5)], repeat=1))))))
