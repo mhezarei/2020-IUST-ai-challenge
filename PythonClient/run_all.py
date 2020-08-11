@@ -48,15 +48,38 @@ class RunClient(threading.Thread):
 
 
 class RunRandomClient(threading.Thread):
+	def __init__(self, cnt_games, dqn_agent, name):
+		super().__init__(name=name)
+		self.counter_games = cnt_games
+		self.agent = dqn_agent
+	
 	def run(self):
 		print("Running Random Client...")
-		os.system('cd {}PythonRandomClient && python3 main.py'.format(code_base_directory))
+		config_path = os.path.join(
+			os.path.dirname(os.path.abspath(__file__)),
+			"random_gamecfg.json"
+		)
+		if len(sys.argv) > 1:
+			config_path = sys.argv[1]
+		
+		ai = AI(World(), self.counter_games, self.agent)
+		app = GameClient(config_path)
+		app.register_ai(ai)
+		app.run()
 
 
-def define_params():
+def get_random_params():
 	parameters = {'epsilon_decay_linear': 1 / 50, 'learning_rate': 0.0005, 'first_layer_size': 100,
 	              'second_layer_size': 150, 'third_layer_size': 100, 'episodes': 100, 'memory_size': 1800,
-	              'weights_path': 'weights/weights.hdf5', 'load_weights': False,
+	              'weights_path': 'weights/random_weights.hdf5', 'load_weights': False,
+	              'save_weights': True}
+	return parameters
+
+
+def get_client_params():
+	parameters = {'epsilon_decay_linear': 1 / 50, 'learning_rate': 0.0005, 'first_layer_size': 100,
+	              'second_layer_size': 150, 'third_layer_size': 100, 'episodes': 100, 'memory_size': 1800,
+	              'weights_path': 'weights/client_weights.hdf5', 'load_weights': False,
 	              'save_weights': True}
 	return parameters
 
@@ -64,16 +87,21 @@ def define_params():
 if __name__ == '__main__':
 	
 	counter_games = 0
-	params = define_params()
-	agent = DQNAgent(params)
+	client_params = get_client_params()
+	client_agent = DQNAgent(client_params)
+	random_params = get_random_params()
+	random_agent = DQNAgent(random_params)
 	
-	if params['load_weights']:
-		agent.model.load_weights(params['weights_path'])
+	if client_params['load_weights']:
+		client_agent.model.load_weights(client_params['weights_path'])
+		
+	if random_params['load_weights']:
+		random_agent.model.load_weights(random_params['weights_path'])
 	
 	run_server = RunServer(name="RunServer")
-	run_random_client = RunRandomClient(name="RunRandomClient")
-	run_client = RunClient(counter_games, agent, name="RunClient")
-	while counter_games < params['episodes']:
+	run_random_client = RunRandomClient(counter_games, client_agent, name="RunRandomClient")
+	run_client = RunClient(counter_games, client_agent, name="RunClient")
+	while counter_games < client_params['episodes']:
 		run_server.start()
 		time.sleep(1)
 		if configs["run_python_client"]:
@@ -83,17 +111,17 @@ if __name__ == '__main__':
 			run_random_client.start()
 			time.sleep(1)
 		
-		print("HI " + str(run_server.is_alive()) + str(run_client.is_alive()) + str(run_random_client.is_alive()))
-		
 		run_server.join()
 		run_client.join()
 		run_random_client.join()
 		
-		print("finished " + str(counter_games))
 		counter_games += 1
-		print("HI " + str(run_server.is_alive()) + str(run_client.is_alive()) + str(run_random_client.is_alive()))
-		if params['save_weights']:
-			agent.model.save_weights(params['weights_path'])
+		
+		if client_params['save_weights']:
+			client_agent.model.save_weights(client_params['weights_path'])
+		if random_params['save_weights']:
+			random_agent.model.save_weights(random_params['weights_path'])
+			
 		run_server = RunServer(name="RunServer")
-		run_random_client = RunRandomClient(name="RunRandomClient")
-		run_client = RunClient(counter_games, agent, name="RunClient")
+		run_random_client = RunRandomClient(counter_games, client_agent, name="RunRandomClient")
+		run_client = RunClient(counter_games, client_agent, name="RunClient")

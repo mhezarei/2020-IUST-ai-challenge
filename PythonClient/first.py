@@ -80,7 +80,6 @@ class AI(RealtimeAI):
 			if method == 'random':
 				action = list(random.choice(self.all_actions))
 			elif method == 'predict':
-				print("state is " + str(state))
 				action = list(map(int, self.agent.model.predict(np.array(state).reshape((1, 30)))[0]))
 				action = self.all_actions[int(np.argmax(action))]
 			if sum(self.ammo_mat_cnt[action[i]] for i in range(len(action))) > 15:
@@ -107,12 +106,9 @@ class AI(RealtimeAI):
 			list(set(itertools.product([i for i in range(5)], repeat=2)))) + sorted(
 			list(set(itertools.product([i for i in range(5)], repeat=1))))
 		self.agent.epsilon = 1 - (self.counter_games * self.agent.decay_rate)
-		print(self.counter_games, self.agent.epsilon)
 	
 	def decide(self):
 		# print('decide')
-		
-		print("stage is " + str(self.stage), "game state is " + str(self.game_state))
 		
 		base = self.world.bases[self.my_side]
 		wagent = base.agents[AgentType.Warehouse]
@@ -128,10 +124,8 @@ class AI(RealtimeAI):
 				self.record.append(state)
 				if random.random() < self.agent.epsilon:
 					self.curr_action, self.current_ammo_mat = self.get_action('random')
-					print("random action " + str(self.curr_action))
 				else:
 					self.curr_action, self.current_ammo_mat = self.get_action('predict', state)
-					print("predicted action " + str(len(self.curr_action)) + " " + str(self.curr_action))
 				assert len(self.curr_action) != 0, "selected action is length 0!"
 				self.record.append(self.curr_action)
 				self.game_state = 1
@@ -147,14 +141,12 @@ class AI(RealtimeAI):
 				else:
 					self.record.append(0)
 				
-				# training the NN
 				self.agent.train_short_memory(np.array(self.record[0]),
 				                              np.array(self.record[1]),
 				                              np.array(self.record[2]),
 				                              np.array([self.record[3]]),
 				                              np.array([self.record[4]]))
 				
-				# append saving to memory
 				self.agent.memory.append((np.array(self.record[0]),
 				                          np.array(self.record[1]),
 				                          np.array(self.record[2]),
