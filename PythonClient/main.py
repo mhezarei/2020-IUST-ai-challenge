@@ -9,8 +9,9 @@ import sys
 from chillin_client import GameClient
 
 sys.path.insert(1, '/home/mh/PycharmProjects/2020-IUST-ai-challenge/DQN')
+
 # project imports
-from custom_ai import AI
+from client_ai import AI
 from ks.models import World
 from DeepQNetwork import DQNAgent
 

@@ -41,22 +41,22 @@ if __name__ == '__main__':
 	run_server = RunServer(name="RunServer")
 	run_random_client = RunRandomClient(name="RunRandomClient")
 	run_client = RunClient(name="RunClient")
-	# while counter_games < 100:
-	run_server.start()
-	time.sleep(1)
-	if configs["run_python_client"]:
-		run_client.start()
+	while counter_games < 100:
+		run_server.start()
 		time.sleep(1)
-	if configs["run_python_random_client"]:
-		run_random_client.start()
-		time.sleep(1)
+		if configs["run_python_client"]:
+			run_client.start()
+			time.sleep(1)
+		if configs["run_python_random_client"]:
+			run_random_client.start()
+			time.sleep(1)
 		
-		# run_server.join()
-		# run_client.join()
-		# run_random_client.join()
-		#
-		# counter_games += 1
-		#
-		# run_server = RunServer(name="RunServer")
-		# run_random_client = RunRandomClient(name="RunRandomClient")
-		# run_client = RunClient(name="RunClient")
+		run_server.join()
+		run_client.join()
+		run_random_client.join()
+
+		counter_games += 1
+
+		run_server = RunServer(name="RunServer")
+		run_random_client = RunRandomClient(name="RunRandomClient")
+		run_client = RunClient(name="RunClient")
