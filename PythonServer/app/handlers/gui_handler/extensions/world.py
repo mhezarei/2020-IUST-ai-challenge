@@ -182,19 +182,19 @@ def gui_update(self, current_cycle, events):
     # Manage events
     for event in events:
         if event.type == GuiEventType.Move:
-            event.client_agent.gui_move(self, event)
+            event.agent.gui_move(self, event)
 
         elif event.type == GuiEventType.PickMaterial:
-            event.client_agent.gui_pick_material(self, event)
+            event.agent.gui_pick_material(self, event)
 
         elif event.type == GuiEventType.PutMaterial:
-            event.client_agent.gui_put_material(self, event)
+            event.agent.gui_put_material(self, event)
 
         elif event.type == GuiEventType.PickAmmo:
-            event.client_agent.gui_pick_ammo(self, event)
+            event.agent.gui_pick_ammo(self, event)
 
         elif event.type == GuiEventType.PutAmmo:
-            event.client_agent.gui_put_ammo(self, event)
+            event.agent.gui_put_ammo(self, event)
 
         elif event.type == GuiEventType.WarehouseReload:
             self.bases[event.side].warehouse.gui_reload(self, event)

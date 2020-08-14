@@ -12,9 +12,10 @@ import json
 import os
 import sys
 from chillin_client import GameClient
-from first import AI
-from ks.models import World
-from DeepQNetwork import DQNAgent
+from PythonRandomClient import random_ai
+from PythonClient.ks import models as client_models
+from PythonRandomClient.ks import models as random_models
+from Classes.DeepQNetwork import DQNAgent
 
 configs = json.loads(open("configs.json", "r").read())
 code_base_directory = configs["code_base_directory"]
@@ -35,13 +36,14 @@ class RunClient(threading.Thread):
 	def run(self):
 		print("Running Client...")
 		config_path = os.path.join(
-			os.path.dirname(os.path.abspath(__file__)),
+			os.path.dirname(os.path.abspath('../PythonClient/main.py')),
 			"gamecfg.json"
 		)
 		if len(sys.argv) > 1:
 			config_path = sys.argv[1]
 		
-		ai = AI(World(), self.counter_games, self.agent)
+		ai = ai.AI(client_models.World(), self.counter_games, self.agent)
+		print(ai)
 		app = GameClient(config_path)
 		app.register_ai(ai)
 		app.run()
@@ -56,13 +58,14 @@ class RunRandomClient(threading.Thread):
 	def run(self):
 		print("Running Random Client...")
 		config_path = os.path.join(
-			os.path.dirname(os.path.abspath(__file__)),
-			"random_gamecfg.json"
+			os.path.dirname(os.path.abspath('../PythonRandomClient/main.py')),
+			"gamecfg.json"
 		)
 		if len(sys.argv) > 1:
 			config_path = sys.argv[1]
 		
-		ai = AI(World(), self.counter_games, self.agent)
+		ai = random_ai.AI(random_models.World(), self.counter_games, self.agent)
+		print(ai)
 		app = GameClient(config_path)
 		app.register_ai(ai)
 		app.run()
@@ -71,7 +74,7 @@ class RunRandomClient(threading.Thread):
 def get_random_params():
 	parameters = {'epsilon_decay_linear': 1 / 50, 'learning_rate': 0.0005, 'first_layer_size': 100,
 	              'second_layer_size': 150, 'third_layer_size': 100, 'episodes': 100, 'memory_size': 1800,
-	              'weights_path': 'weights/random_weights.hdf5', 'load_weights': False,
+	              'weights_path': '../PythonRandomClient/weights/random_weights.hdf5', 'load_weights': False,
 	              'save_weights': True}
 	return parameters
 
@@ -79,7 +82,7 @@ def get_random_params():
 def get_client_params():
 	parameters = {'epsilon_decay_linear': 1 / 50, 'learning_rate': 0.0005, 'first_layer_size': 100,
 	              'second_layer_size': 150, 'third_layer_size': 100, 'episodes': 100, 'memory_size': 1800,
-	              'weights_path': 'weights/client_weights.hdf5', 'load_weights': False,
+	              'weights_path': '../PythonClient/weights/client_weights.hdf5', 'load_weights': False,
 	              'save_weights': True}
 	return parameters
 
@@ -94,7 +97,7 @@ if __name__ == '__main__':
 	
 	if client_params['load_weights']:
 		client_agent.model.load_weights(client_params['weights_path'])
-		
+	
 	if random_params['load_weights']:
 		random_agent.model.load_weights(random_params['weights_path'])
 	
@@ -111,6 +114,7 @@ if __name__ == '__main__':
 			run_random_client.start()
 			time.sleep(1)
 		
+		print(run_server.is_alive(), run_client.is_alive(), run_random_client.is_alive())
 		run_server.join()
 		run_client.join()
 		run_random_client.join()
@@ -118,10 +122,14 @@ if __name__ == '__main__':
 		counter_games += 1
 		
 		if client_params['save_weights']:
+			if os.path.isfile(client_params['weights_path']):
+				os.remove(client_params['weights_path'])
 			client_agent.model.save_weights(client_params['weights_path'])
 		if random_params['save_weights']:
+			if os.path.isfile(random_params['weights_path']):
+				os.remove(random_params['weights_path'])
 			random_agent.model.save_weights(random_params['weights_path'])
-			
+		
 		run_server = RunServer(name="RunServer")
 		run_random_client = RunRandomClient(counter_games, client_agent, name="RunRandomClient")
 		run_client = RunClient(counter_games, client_agent, name="RunClient")

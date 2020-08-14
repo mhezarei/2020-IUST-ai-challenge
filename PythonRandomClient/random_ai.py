@@ -101,7 +101,7 @@ class AI(RealtimeAI):
 		return action, materials
 	
 	def initialize(self):
-		print('initialize')
+		print('initialize random ai')
 		self.all_actions = sorted(list(set(itertools.product([i for i in range(5)], repeat=3)))) + sorted(
 			list(set(itertools.product([i for i in range(5)], repeat=2)))) + sorted(
 			list(set(itertools.product([i for i in range(5)], repeat=1))))
