@@ -115,7 +115,6 @@ class AI(RealtimeAI):
 		self.logger.info('  Epsilon is ' + str(self.agent.epsilon))
 		
 	def decide(self):
-		self.logger.info('  Cycle ' + str(self.current_cycle) + ' Stage ' + str(self.stage) + ' Game State ' + str(self.game_state))
 		
 		base = self.world.bases[self.my_side]
 		wagent = base.agents[AgentType.Warehouse]
@@ -131,11 +130,10 @@ class AI(RealtimeAI):
 				self.record.append(state)
 				if random.random() < self.agent.epsilon:
 					self.curr_action, self.current_ammo_mat = self.get_action('random')
-					self.logger.info("    Chosen Random Action: " + str(self.curr_action))
+					self.logger.info("    Chosen Random Action: " + str(self.curr_action) + " at cycle " + str(self.current_cycle))
 				else:
 					self.curr_action, self.current_ammo_mat = self.get_action('predict', state)
-					self.logger.info("    Chosen Predicted Action: " + str(self.curr_action))
-				assert len(self.curr_action) != 0, "selected action is length 0!"
+					self.logger.info("    Chosen Predicted Action: " + str(self.curr_action) + " at cycle " + str(self.current_cycle))
 				self.record.append(self.curr_action)
 				self.game_state = 1
 				self.stage += 1
@@ -150,11 +148,12 @@ class AI(RealtimeAI):
 				else:
 					self.record.append(0)
 				
-				self.agent.train_short_memory(np.array(self.record[0]),
-				                              np.array(self.record[1]),
-				                              np.array(self.record[2]),
-				                              np.array([self.record[3]]),
-				                              np.array([self.record[4]]))
+				if self.record[4] == 0:
+					self.agent.train_short_memory(np.array(self.record[0]),
+					                              np.array(self.record[1]),
+					                              np.array(self.record[2]),
+					                              np.array([self.record[3]]),
+					                              np.array([self.record[4]]))
 				
 				self.agent.memory.append((np.array(self.record[0]),
 				                          np.array(self.record[1]),

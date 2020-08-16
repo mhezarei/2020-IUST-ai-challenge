@@ -1,3 +1,5 @@
+import random
+
 from keras.optimizers import Adam
 from keras.models import Sequential
 from keras.layers.core import Dense
@@ -10,7 +12,6 @@ class DQNAgent(object):
 	def __init__(self, params):
 		self.reward = 0
 		self.gamma = 0.99
-		self.short_memory = np.array([])
 		self.agent_target = 1
 		self.agent_predict = 0
 		self.learning_rate = params['learning_rate']
@@ -21,11 +22,12 @@ class DQNAgent(object):
 		self.second_layer = params['second_layer_size']
 		self.third_layer = params['third_layer_size']
 		self.memory = collections.deque(maxlen=params['memory_size'])
+		self.batch_size = params['batch_size']
 		self.weights_path = params['weights_path']
 		self.load_weights = params['load_weights']
 		self.save_weight = params['save_weights']
 		self.model = self.network()
-
+	
 	def network(self):
 		model = Sequential()
 		model.add(Dense(units=self.first_layer, activation='relu', input_dim=30))
@@ -35,10 +37,19 @@ class DQNAgent(object):
 		opt = Adam(self.learning_rate)
 		model.compile(loss='mse', optimizer=opt)
 		return model
-
-	def remember(self, state, action, next_state, reward, done):
-		self.memory.append((state, action, next_state, reward, done))
-
+	
+	def remember(self, record):
+		self.memory.append((np.array(record[0]), np.array(record[1]), np.array(record[2]), np.array([record[3]]),
+		                    np.array([record[4]])))
+	
+	def replay_new(self):
+		if len(self.memory) > self.batch_size:
+			mini_batch = random.sample(self.memory, self.batch_size)
+		else:
+			mini_batch = self.memory
+		for state, action, next_state, reward, done in mini_batch:
+			self.train_short_memory(state, action, next_state, reward, done)
+	
 	def train_short_memory(self, state, action, next_state, reward, done):
 		target = reward
 		if not done:
