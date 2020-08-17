@@ -107,7 +107,7 @@ class AI(RealtimeAI):
 		self.all_actions = sorted(list(set(itertools.product([i for i in range(5)], repeat=3)))) + sorted(
 			list(set(itertools.product([i for i in range(5)], repeat=2)))) + sorted(
 			list(set(itertools.product([i for i in range(5)], repeat=1))))
-		self.agent.epsilon = 1 - (self.counter_games * self.agent.decay_rate)
+		# self.agent.epsilon = 1 - (self.counter_games * self.agent.decay_rate)
 		logging.basicConfig(filename='client.log', filemode='a', format='%(message)s')
 		self.logger = logging.getLogger()
 		self.logger.setLevel(logging.INFO)

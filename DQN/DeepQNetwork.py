@@ -10,14 +10,10 @@ import collections
 
 class DQNAgent(object):
 	def __init__(self, params):
-		self.reward = 0
-		self.gamma = 0.99
-		self.agent_target = 1
-		self.agent_predict = 0
+		self.gamma = 0.9
 		self.learning_rate = params['learning_rate']
 		self.decay_rate = params['epsilon_decay_linear']
-		self.epsilon = 1
-		self.actual = []
+		self.epsilon = 0.30
 		self.first_layer = params['first_layer_size']
 		self.second_layer = params['second_layer_size']
 		self.third_layer = params['third_layer_size']
@@ -49,10 +45,11 @@ class DQNAgent(object):
 			mini_batch = self.memory
 		for state, action, next_state, reward, done in mini_batch:
 			self.train_short_memory(state, action, next_state, reward, done)
+		print("Replay Successful!")
 	
 	def train_short_memory(self, state, action, next_state, reward, done):
 		target = reward
-		if not done:
+		if done[0] == 0:
 			target = reward + self.gamma * np.amax(self.model.predict(next_state.reshape((1, 30)))[0])
 		target_f = self.model.predict(state.reshape((1, 30)))
 		target_f[0][np.argmax(action)] = target
