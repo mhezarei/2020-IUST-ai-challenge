@@ -37,7 +37,7 @@ if len(sys.argv) > 1:
 random_params = get_random_params()
 random_agent = DQNAgent(random_params)
 
-if random_params['load_weights']:
+if random_params['load_weights'] and os.path.isfile(random_params['weights_path']):
 	random_agent.model.load_weights(random_params['weights_path'])
 
 ai = AI(World(), counter_games, random_agent)

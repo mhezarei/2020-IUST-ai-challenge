@@ -37,7 +37,7 @@ if len(sys.argv) > 1:
 client_params = get_client_params()
 agent = DQNAgent(client_params)
 
-if client_params['load_weights']:
+if client_params['load_weights'] and os.path.isfile(client_params['weights_path']):
 	agent.model.load_weights(client_params['weights_path'])
 
 ai = AI(World(), counter_games, agent)
