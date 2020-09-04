@@ -1,4 +1,5 @@
 import os
+from collections import deque
 from itertools import *
 import math
 # import time
@@ -39,12 +40,14 @@ for comb in bro:
 	mat_count.append(cnt)
 
 # fixed = [bro[i] for i in range(len(bro)) if mat_count[i] <= 15]
-fixed = [bro[i] for i in range(len(bro)) if 1 <= bro[i].count(4) <= 2 and mat_count[i] <= 30]
+fixed = [bro[i] for i in range(len(bro)) if
+         1 <= bro[i].count(4) <= 2 and mat_count[i] <= 30]
 print(len(fixed), fixed)
 # print(len(bro), bro)
 # print(len(mat_count), mat_count)
 
-temp = [[6, 0, 1, 3, 0], [2, 5, 1, 1, 1], [4, 0, 2, 4, 0], [2, 3, 2, 2, 1], [1, 3, 1, 2, 3]]
+temp = [[6, 0, 1, 3, 0], [2, 5, 1, 1, 1], [4, 0, 2, 4, 0], [2, 3, 2, 2, 1],
+        [1, 3, 1, 2, 3]]
 dist = [[x / 10 for x in sub] for sub in temp]
 
 ammo_size = [75, 5, 150, 10, 2]
@@ -87,7 +90,8 @@ for act in fixed:
 		for i in range(5):
 			if rem[i] == max_rem[i] and ammo[i] > 0:
 				for j in range(5):
-					taken2[j] += math.ceil((min(count[i], ammo[i]) * base_dmg[i]) * dist[i][j])
+					taken2[j] += math.ceil(
+						(min(count[i], ammo[i]) * base_dmg[i]) * dist[i][j])
 				ammo[i] = max(ammo[i] - count[i], 0)
 				did_dmg[i] = True
 			
@@ -99,7 +103,7 @@ for act in fixed:
 				if rem[i] == 0:
 					rem[i] = max_rem[i]
 					did_dmg[i] = False
-			
+		
 		for i in range(5):
 			hp2[i] = max(hp2[i] - taken2[i], 0)
 		
@@ -128,7 +132,9 @@ for act in fixed:
 			num_wins += 1
 			total_diff += sorted(diff, reverse=True)[i]
 	if num_wins > 0:
-		print('#################### num wins = ' + str(num_wins) + ' total diff = ' + str(total_diff) + ' avg diff = ' + str(total_diff / num_wins))
+		print('#################### num wins = ' + str(
+			num_wins) + ' total diff = ' + str(
+			total_diff) + ' avg diff = ' + str(total_diff / num_wins))
 
 # qwer = 0
 # for act in fixed:
@@ -223,3 +229,7 @@ for act in fixed:
 # 			total_diff += sorted(diff, reverse=True)[i]
 # 	if num_wins > 0:
 # 		print('#################### num wins = ' + str(num_wins) + ' total diff = ' + str(total_diff) + ' avg diff = ' + str(total_diff / num_wins))
+
+A = {1: 2, 2: 4, 3: 62, 4: 21, 5: 211}
+B = {2: 5, 3: 3, 4: 1}
+print({key: A[key] - B.get(key, 0) for key in A.keys()})

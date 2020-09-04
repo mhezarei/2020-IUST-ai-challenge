@@ -12,7 +12,7 @@ from chillin_client import GameClient
 sys.path.insert(1, '../DQN')
 
 # project imports
-from client_new import AI
+from client_final import AI
 from ks.models import World
 from DeepQNetwork import DQNAgent
 

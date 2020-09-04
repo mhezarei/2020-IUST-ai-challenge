@@ -1,0 +1,56 @@
+the godfather: 70023, 40002, and repeating
+	goes to the beginning every time and comes to BLD
+	0/0/0/20/5 = 25 ;; btw 11 of these mortars are useless
+	748
+	cycle 265
+
+anaar: 70023, 43302, 50021, 50023, 70024, 12201, 60025
+	picks up on the going back and comes to BLD.
+	1/5/2/6/4 = 18
+	860
+	cycle 223
+
+niktech: 62222, 60003, 62222, 60004, 70025, 70024, 20002
+	goes to the end then BLD
+	0/5/2/7/4 = 18
+	5204
+	cycle 207
+
+nita: 30021, 32203, 10002, 20020, 30002, 10020, 40000, 00003, 30000, 00020
+	picks up then end
+	0/3/1/1/3
+	i won by 4060
+	cycle 208
+
+qadir: 62222, 20001, 80023, 30001,
+	end then BLD
+	0/0/2/7/4 = 15
+	3288
+	cycle 212
+
+sadegh: 53321, 70020, 00206, 00226, 00006,
+	doesn't pick up the second time lmao (just first round :D)
+	pick then BLD
+	1/7/2/4/2 = 16 (actually 1/4/2/3/1 = 11)
+	1084
+	cycle 247
+
+the_dark: 62222, 60003, 62222, 60004, 70025, 70024, 20002
+	end then pick then BLD
+	0/5/2/8/4 = 19
+	5204
+	cycle 207
+
+thunder: 62223, 43303, 33402, 40020, 60020, 42200, 20020,
+	pick then end then BLD
+	1/0/4/8/4 = 17
+	2586
+	cycle 223
+
+waw: 30021, 12200, repeating
+	end then picking up
+	0/0/5/0/5 = 10
+	180 - 680
+	cycle 300
+
+ME MYSELF: now i have 1/4/2/12/5 which seems promising.

@@ -12,7 +12,7 @@ from chillin_client import GameClient
 sys.path.insert(1, '../DQN')
 
 # project imports
-from random_ai import AI
+from random_new import AI
 from ks.models import World
 from DeepQNetwork import DQNAgent
 
@@ -38,27 +38,28 @@ if len(sys.argv) > 1:
 random_params = get_random_params()
 random_agent = DQNAgent(random_params)
 
-if random_params['load_weights'] and os.path.isfile(random_params['weights_path']):
-	random_agent.model.load_weights(random_params['weights_path'])
-	
-if random_params['load_mem'] and os.path.isfile(random_params['mem_path']):
-	print("yes")
-	with open(random_params['mem_path'], 'rb') as mem:
-		random_agent.memory = pickle.load(mem)
+# if random_params['load_weights'] and os.path.isfile(random_params['weights_path']):
+# 	random_agent.model.load_weights(random_params['weights_path'])
+#
+# if random_params['load_mem'] and os.path.isfile(random_params['mem_path']):
+# 	print("yes")
+# 	with open(random_params['mem_path'], 'rb') as mem:
+# 		random_agent.memory = pickle.load(mem)
 
-ai = AI(World(), counter_games, random_agent)
+# ai = AI(World(), counter_games, random_agent)
+ai = AI(World())
 app = GameClient(config_path)
 app.register_ai(ai)
 app.run()
 
-if counter_games >= 20:
-	random_agent.replay_new()
-
-if random_params['save_weights']:
-	random_agent.model.save_weights(random_params['weights_path'])
-	
-if random_params['save_mem']:
-	with open(random_params['mem_path'], 'wb') as mem:
-		pickle.dump(random_agent.memory, mem)
-
-print(len(random_agent.memory))
+# if counter_games >= 20:
+# 	random_agent.replay_new()
+#
+# if random_params['save_weights']:
+# 	random_agent.model.save_weights(random_params['weights_path'])
+#
+# if random_params['save_mem']:
+# 	with open(random_params['mem_path'], 'wb') as mem:
+# 		pickle.dump(random_agent.memory, mem)
+#
+# print(len(random_agent.memory))
