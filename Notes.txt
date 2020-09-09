@@ -1,6 +1,5 @@
 TODO
+predict the future in scheme and make decisions based on that. like is unit ammo running low or does it have enough?
 
-
-Normal Notes
-when scheme has 15+ mats, we need to create 3 picking schemes and after them, normal; For 15- mats, it is ok; Write "self.does_satisfy()"
-we might not be able to give 15+ schemes cuz it takes so much time.
+find best strategy,
+give current strategy to random and try to fuck it :D

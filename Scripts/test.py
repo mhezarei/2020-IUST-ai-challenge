@@ -1,3 +1,10 @@
+# for i in range(1, 149):
+# 	adding = str(i)
+# 	while len(adding) < 2:
+# 		adding = '0' + adding
+# 	# print(adding)
+# 	print("http://dl.upupfilm.ir/Animation%20TV/tv/%5BFilmGozar.com%5D%20Hunter%20x%20Hunter%20%282011%29/1080p/Hunter%20X%20Hunter%20%282011%29%20-%20" + adding + "%20%5B1080p%5D-%5BFilmGozar.com%5D.mkv")
+
 import os
 from collections import deque
 from itertools import *
@@ -69,7 +76,7 @@ for act in fixed:
 	max_rem = [3, 15, 0, 7, 25]
 	taken = [0 for i in range(5)]
 	did_dmg = [False for i in range(5)]
-	
+
 	hp2 = [1570, 4380, 1520, 3520, 2960]
 	base_hp2 = [150, 500, 400, 300, 1000]
 	count2 = [0 for i in range(5)]
@@ -79,14 +86,14 @@ for act in fixed:
 	max_rem2 = [3, 15, 0, 7, 25]
 	taken2 = [0 for i in range(5)]
 	did_dmg2 = [False for i in range(5)]
-	
+
 	while True:
 		taken2 = [0 for i in range(5)]
 		# print(hp, hp2)
 		for i in range(5):
 			count[i] = math.ceil(hp[i] / base_hp[i])
 			count2[i] = math.ceil(hp2[i] / base_hp2[i])
-		
+
 		for i in range(5):
 			if rem[i] == max_rem[i] and ammo[i] > 0:
 				for j in range(5):
@@ -94,19 +101,19 @@ for act in fixed:
 						(min(count[i], ammo[i]) * base_dmg[i]) * dist[i][j])
 				ammo[i] = max(ammo[i] - count[i], 0)
 				did_dmg[i] = True
-			
+
 			if i == 2:
 				continue
-			
+
 			if did_dmg[i]:
 				rem[i] -= 1
 				if rem[i] == 0:
 					rem[i] = max_rem[i]
 					did_dmg[i] = False
-		
+
 		for i in range(5):
 			hp2[i] = max(hp2[i] - taken2[i], 0)
-		
+
 		if all(ammo[i] == 0 or count[i] == 0 for i in range(5)):
 			hps.append(sum(hp))
 			hps2.append(sum(hp2))

@@ -50,7 +50,6 @@ class AI(RealtimeAI):
 		self.f_pos = None
 		
 		self.map = ""
-		self.all_ammo_choices = []
 	
 	def initialize(self):
 		print('initialize client ai')
@@ -66,18 +65,14 @@ class AI(RealtimeAI):
 		if self.current_cycle == 0:
 			self.find_map(base)
 		
-		if self.current_cycle == 300 or self.world.total_healths[self.my_side] == 0 or self.world.total_healths[self.other_side] == 0:
-			print(" OP\n".join([str(c) for c in self.all_ammo_choices]))
-			print("OP CHOSEN AMMO", self.ammo_choice_cnt)
-		
 		self.check_and_ban_ammo(base)
 		
 		self.factory_agent_handler(base, fagent, machines)
 		
 		self.warehouse_agent_handler(base, wagent, machines)
 		
-		print(self.w_state)
-		print(self.f_state)
+		# print(self.w_state)
+		# print(self.f_state)
 	
 	# Warehouse Agent Commands
 	
@@ -126,10 +121,10 @@ class AI(RealtimeAI):
 					self.map = "NoTime"
 				elif self.world.max_cycles == 300:
 					self.map = "AllIn"
-					self.max_ammo_choice_cnt = {AmmoType.RifleBullet: 1, AmmoType.TankShell: 5, AmmoType.HMGBullet: 2, AmmoType.MortarShell: 100, AmmoType.GoldenTankShell: 100}
+					self.max_ammo_choice_cnt = {AmmoType.RifleBullet: 0, AmmoType.TankShell: 2, AmmoType.HMGBullet: 1, AmmoType.MortarShell: 100, AmmoType.GoldenTankShell: 100}
 		elif count == 40:
 			self.map = "LastStand"
-			self.max_ammo_choice_cnt = {AmmoType.RifleBullet: 10, AmmoType.TankShell: 5, AmmoType.HMGBullet: 1, AmmoType.MortarShell: 100, AmmoType.GoldenTankShell: 0}
+			self.max_ammo_choice_cnt = {AmmoType.RifleBullet: 100, AmmoType.TankShell: 5, AmmoType.HMGBullet: 1, AmmoType.MortarShell: 100, AmmoType.GoldenTankShell: 0}
 		elif count == 6:
 			self.map = "Artileryyyy"
 		elif count == 50:
@@ -137,11 +132,6 @@ class AI(RealtimeAI):
 		elif count == 10:
 			self.map = "PanzerStorm"
 
-	def update_strategy(self, op_fld):
-		if len(op_fld) > 0 and op_fld[0].delivery_rem_time == op_fld[0].c_delivery_duration:
-			self.op_ammo_choice_cnt = self.merge_sum_dicts(self.op_ammo_choice_cnt, op_fld[0].ammos)
-			print("UPDATED", self.op_ammo_choice_cnt)
-	
 	def total_warehouse_material_count(self, base):
 		return sum(base.warehouse.materials[Position(i)].count for i in range(1, 6))
 	
@@ -216,7 +206,6 @@ class AI(RealtimeAI):
 		
 	def predict_ammo_ban(self, cycles, my_base, op_base):
 		dmg_dist = [[x / 10 for x in sub] for sub in [[6, 0, 1, 3, 0], [2, 5, 1, 1, 1], [4, 0, 2, 4, 0], [2, 3, 2, 2, 1], [1, 3, 1, 2, 3]]]
-		print(dmg_dist)
 		base_hp = [my_base.units[u_type].c_individual_health for u_type in UnitType]
 		base_dmg = [my_base.units[u_type].c_individual_damage for u_type in UnitType]
 		max_rem = [my_base.units[u_type].c_reload_duration for u_type in UnitType]
@@ -231,7 +220,6 @@ class AI(RealtimeAI):
 		ammo2 = [op_base.units[u_type].ammo_count for u_type in UnitType]
 		rem2 = [op_base.units[u_type].reload_rem_time for u_type in UnitType]
 		
-		print(ammo, ammo2, rem, rem2)
 		for c in range(cycles):
 			taken2 = [0] * 5
 			taken = [0] * 5
@@ -255,13 +243,10 @@ class AI(RealtimeAI):
 				rem[i] = rem[i] - 1 if rem[i] >= 2 else max_rem[i]
 				rem2[i] = rem2[i] - 1 if rem2[i] >= 2 else max_rem[i]
 			
-			# print(taken, taken2, rem, rem2)
-			
 			for i in range(5):
 				hp2[i] = max(hp2[i] - taken2[i], 0)
 				hp[i] = max(hp[i] - taken[i], 0)
 		
-		print("FROM", [math.ceil(my_base.units[u_type].health / base_hp[i]) for i, u_type in enumerate(UnitType)], "TO", count)
 		for i, unit in enumerate(UnitType):
 			if count[i] == 0 and self.unit_ammo[unit] not in self.banned_ammo:
 				print("YES BANNED FROM FUTURE IS", unit)
@@ -282,7 +267,6 @@ class AI(RealtimeAI):
 			for ammo in possible_ammo:
 				if self.can_make_ammo(ammo, base, adjusted_materials, ammo_sequence):
 					ammo_sequence.append(ammo)
-					self.ammo_choice_cnt[ammo] += 1
 					adjusted_materials = self.sub_dicts(adjusted_materials, mixture[ammo])
 					break_cond = self.choose_break_cond(len(ammo_sequence))
 					if break_cond:
@@ -297,10 +281,19 @@ class AI(RealtimeAI):
 				ammo_sequence = [AmmoType.MortarShell, AmmoType.RifleBullet, AmmoType.RifleBullet]
 			if 30 < self.current_cycle < 50:
 				ammo_sequence = [AmmoType.MortarShell, AmmoType.MortarShell, AmmoType.RifleBullet]
+		
+		if self.map == "AllIn":
+			if self.current_cycle < 5:
+				ammo_sequence = [AmmoType.GoldenTankShell, AmmoType.HMGBullet, AmmoType.MortarShell]
+			if 5 < self.current_cycle < 30:
+				ammo_sequence = [AmmoType.MortarShell, AmmoType.MortarShell, AmmoType.MortarShell]
+			# if 30 < self.current_cycle < 55:
+			# 	ammo_sequence = [AmmoType.GoldenTankShell, AmmoType.MortarShell, AmmoType.MortarShell]
 
 		scheme = self.zero_scheme.copy()
 		for ammo in ammo_sequence:
 			scheme = self.merge_sum_dicts(scheme, mixture[ammo])
+			self.ammo_choice_cnt[ammo] += 1
 
 		for i, ammo in enumerate([AmmoType.GoldenTankShell, AmmoType.TankShell, AmmoType.MortarShell, AmmoType.RifleBullet, AmmoType.HMGBullet]):
 			if ammo in ammo_sequence:
@@ -309,215 +302,35 @@ class AI(RealtimeAI):
 		self.picking_scheme = scheme.copy()
 		if len(ammo_sequence) > 0:
 			self.ammo_queue.append(ammo_sequence.copy())
-			self.all_ammo_choices.append(ammo_sequence.copy())
-		print("OP SCHEME AMMO", ammo_sequence)
 	
 	def should_go_for(self, machine):
-		# pos = machine.position.index
 		return machine.status == MachineStatus.AmmoReady or 1 <= machine.construction_rem_time <= 6
 	
 	# FACTORY AGENT PART
 	
 	def factory_agent_handler(self, base, fagent, machines):
 		if self.f_state == FactoryState.Idle:
-			if self.f_pos == Position(6):
-				self.rdy_machines += [i for i in range(7, 10) if self.should_go_for(machines[Position(i)]) and i not in self.rdy_machines]
-				if len(self.rdy_machines) > 0:
-					self.f_state = FactoryState.PickingAmmo
-					self.f_forward = True
-					self.factory_agent_move(self.f_forward)
-				elif any(machines[Position(i)].current_ammo == AmmoType.GoldenTankShell and machines[Position(i)].status == MachineStatus.Working and machines[Position(i)].construction_rem_time < 6 for i in range(7, 10)):
-					self.f_state = FactoryState.PickingAmmo
-					self.f_forward = True
-					self.factory_agent_move(self.f_forward)
-				elif any(machines[Position(i)].status == MachineStatus.Idle for i in range(7, 10)) and self.total_BLD_material_count(base) > 0:  # any of the machines is idle
-					self.f_state = FactoryState.MakingAmmo
-			else:
-				self.f_forward = False
-				self.factory_agent_move(self.f_forward)
-		
+			self.f_idle(base, fagent, machines)
 		elif self.f_state == FactoryState.MakingAmmo:
-			if self.f_pos == Position(6):
-				if len(self.ammo_queue) > 0:
-					for i, a_type in enumerate(self.ammo_queue[0]):
-						if self.can_f_pick_mat(fagent, a_type, base):
-							self.factory_agent_pick_material(base.factory.c_mixture_formulas[a_type])
-							self.ammo_queue[0].pop(i)
-							self.ammo_to_make.append(a_type)
-							return
-				
-				if len(self.ammo_to_make) > 0:
-					self.f_forward = True
-					self.factory_agent_move(self.f_forward)
-					self.ammo_queue.pop(0)
-				else:
-					self.f_state = FactoryState.Idle
-			elif machines[self.f_pos].status == MachineStatus.AmmoReady:
-				if machines[self.f_pos].current_ammo == AmmoType.GoldenTankShell:
-					self.f_state = FactoryState.GoingToBLD
-				self.factory_agent_pick_ammo()
-				if self.f_pos.index in self.rdy_machines:
-					self.rdy_machines.remove(self.f_pos.index)
-			elif len(self.ammo_to_make) == 0 and machines[self.f_pos].status == MachineStatus.Working and machines[self.f_pos].construction_rem_time <= 5:
-				self.f_state = FactoryState.PickingAmmo
-				return
-			elif len(self.ammo_to_make) == 0 or all(machines[Position(i)].status != MachineStatus.Idle for i in range(7, 10)):
-				if any(machines[Position(i)].status == MachineStatus.AmmoReady for i in range(self.f_pos.index + 1, 10)):
-					self.f_forward = True
-					self.factory_agent_move(self.f_forward)
-				else:
-					self.f_state = FactoryState.GoingToBLD
-			elif machines[self.f_pos].status == MachineStatus.Idle and sum(fagent.materials_bag.values()) > 0 and len(self.ammo_to_make) > 0:
-				self.factory_agent_put_material(self.ammo_to_make[0])
-				self.ammo_to_make.pop(0)
-			else:
-				if self.f_pos == Position(9):
-					self.f_forward = False
-				else:
-					self.f_forward = True
-				self.factory_agent_move(self.f_forward)
-		
+			self.f_making_ammo(base, fagent, machines)
 		elif self.f_state == FactoryState.PickingAmmo:
-			self.rdy_machines += [i for i in range(7, 10) if self.should_go_for(machines[Position(i)]) and i not in self.rdy_machines]
-			if self.f_pos == Position(6):
-				self.f_forward = True
-				self.factory_agent_move(self.f_forward)
-			elif len(self.rdy_machines) == 0:
-				self.f_state = FactoryState.GoingToBLD
-				self.f_forward = False
-				self.factory_agent_move(self.f_forward)
-			elif machines[self.f_pos].status == MachineStatus.AmmoReady:
-				if machines[self.f_pos].current_ammo == AmmoType.GoldenTankShell:
-					self.f_state = FactoryState.GoingToBLD
-				self.factory_agent_pick_ammo()
-				if self.f_pos.index in self.rdy_machines:
-					self.rdy_machines.remove(self.f_pos.index)
-			elif machines[self.f_pos].status == MachineStatus.Idle and sum(fagent.materials_bag.values()) > 0 and len(self.ammo_to_make) > 0:
-				self.factory_agent_put_material(self.ammo_to_make[0])
-				self.ammo_to_make.pop(0)
-			elif machines[self.f_pos].current_ammo == AmmoType.GoldenTankShell and machines[self.f_pos].status == MachineStatus.Working and machines[self.f_pos].construction_rem_time < 5:
-				return
-			elif len(self.ammo_to_make) == 0 and machines[self.f_pos].status == MachineStatus.Working and machines[self.f_pos].construction_rem_time < 4 and all(machines[Position(i)].status == MachineStatus.Idle or (machines[Position(i)].status == MachineStatus.Working and machines[Position(i)].construction_rem_time > 7) for i in range(7, 10) if i != self.f_pos.index):
-				return
-			else:
-				if self.should_go_for(machines[Position(9)]) or (self.should_go_for(machines[Position(8)]) and self.f_pos != Position(9)) or (self.should_go_for(machines[Position(7)]) and self.f_pos == Position(6)):
-					self.f_forward = True
-				else:
-					self.f_forward = False
-				self.factory_agent_move(self.f_forward)
-		
+			self.f_picking_ammo(fagent, machines)
 		elif self.f_state == FactoryState.GoingToBLD:
-			if self.f_pos == Position(6):
-				self.f_state = FactoryState.Idle
-				self.factory_agent_put_ammo()
-			elif machines[self.f_pos].status == MachineStatus.AmmoReady:
-				self.factory_agent_pick_ammo()
-				if self.f_pos.index in self.rdy_machines:
-					self.rdy_machines.remove(self.f_pos.index)
-			elif len(self.ammo_to_make) == 0 and (fagent.ammos_bag[AmmoType.GoldenTankShell] == 0 and machines[self.f_pos].status == MachineStatus.Working and machines[self.f_pos].construction_rem_time < 5):
-				return
-			elif machines[self.f_pos].status == MachineStatus.Idle and sum(fagent.materials_bag.values()) > 0 and len(self.ammo_to_make) > 0:
-				self.factory_agent_put_material(self.ammo_to_make[0])
-				self.ammo_to_make.pop(0)
-			else:
-				self.f_forward = False
-				self.factory_agent_move(self.f_forward)
+			self.f_going_fld(fagent, machines)
 	
 	# WAREHOUSE AGENT PART
 	
 	def warehouse_agent_handler(self, base, wagent, machines):
 		if self.w_state == WarehouseState.Idle:
-			if self.w_pos == Position(0):  # FLD
-				if self.total_warehouse_material_count(base) > 5:
-					self.w_state = WarehouseState.PickingMaterial
-					self.choose_scheme(base)
-					self.w_forward = True
-					self.warehouse_agent_move(self.w_forward)
-				else:
-					if base.warehouse.materials_reload_rem_time > 15:
-						if self.total_BLD_ammo_count(base) > 0:
-							self.w_state = WarehouseState.BringingAmmo
-						# elif any(self.machine_near_rdy(machines, i, 10) for i in range(7, 10)):
-						# 	self.w_state = WarehouseState.GoingToBLD
-						self.w_forward = True
-						self.warehouse_agent_move(self.w_forward)
-			elif self.w_pos == Position(6):  # BLD
-				if self.f_state != FactoryState.GoingToBLD and base.backline_delivery.ammos[AmmoType.GoldenTankShell] > 0:
-					self.take_ammo(base)
-					return
-				elif self.should_w_wait_in_BLD(machines, base):
-					return
-				elif self.total_BLD_ammo_count(base) > 0 and (self.f_state == FactoryState.MakingAmmo or (self.f_state == FactoryState.Idle and self.total_f_ammo_count(base) == 0)):
-					self.take_ammo(base)
-					return
-				else:
-					if self.total_warehouse_material_count(base) > 5:
-						self.w_state = WarehouseState.PickingMaterial
-						self.choose_scheme(base)
-						self.w_forward = False
-						self.warehouse_agent_move(self.w_forward)
-					else:
-						if base.warehouse.materials_reload_rem_time <= 15:
-							self.w_state = WarehouseState.GoingToFLD
-							self.w_forward = False
-							self.warehouse_agent_move(self.w_forward)
-		
+			self.w_idle(base, machines)
 		elif self.w_state == WarehouseState.PickingMaterial:
-			if self.w_pos == Position(6):
-				if sum(wagent.materials_bag.values()) > 0:
-					self.warehouse_agent_put_material()
-				elif self.f_state != FactoryState.GoingToBLD and base.backline_delivery.ammos[AmmoType.GoldenTankShell] > 0:
-					self.take_ammo(base)
-					return
-				elif self.should_w_wait_in_BLD(machines, base):
-					return
-				elif self.total_BLD_ammo_count(base) > 0 and (self.f_state == FactoryState.MakingAmmo or (self.f_state == FactoryState.Idle and self.total_f_ammo_count(base) == 0)):
-					self.take_ammo(base)
-				else:
-					self.w_state = WarehouseState.Idle
-			else:
-				mat_type = base.warehouse.materials[self.w_pos].type
-				if base.warehouse.materials[self.w_pos].count > 0 and wagent.materials_bag[mat_type] < self.picking_scheme[mat_type] and self.can_w_pick_mat(wagent):
-					self.warehouse_agent_pick_material()
-				elif self.w_pos == Position(1) and not self.w_forward:
-					self.w_state = WarehouseState.GoingToBLD
-					self.w_forward = True
-					self.warehouse_agent_move(self.w_forward)
-				else:
-					self.warehouse_agent_move(self.w_forward)
-		
+			self.w_picking_material(base, wagent, machines)
 		elif self.w_state == WarehouseState.BringingAmmo:
-			if self.w_pos == Position(0):
-				self.warehouse_agent_put_ammo()
-				self.w_state = WarehouseState.Idle
-			else:
-				self.w_forward = False
-				self.warehouse_agent_move(self.w_forward)
-		
+			self.w_going_fld()
 		elif self.w_state == WarehouseState.GoingToBLD:
-			if self.w_pos == Position(6):
-				if sum(wagent.materials_bag.values()) > 0:
-					self.warehouse_agent_put_material()
-				elif self.f_state != FactoryState.GoingToBLD and base.backline_delivery.ammos[AmmoType.GoldenTankShell] > 0:
-					self.take_ammo(base)
-					return
-				elif self.should_w_wait_in_BLD(machines, base):
-					return
-				elif self.total_BLD_ammo_count(base) > 0 and (self.f_state == FactoryState.MakingAmmo or (self.f_state == FactoryState.Idle and self.total_f_ammo_count(base) == 0)):
-					self.take_ammo(base)
-				else:
-					self.w_state = WarehouseState.Idle
-			else:
-				self.w_forward = True
-				self.warehouse_agent_move(self.w_forward)
-		
+			self.w_going_bld(base, wagent, machines)
 		elif self.w_state == WarehouseState.GoingToFLD:
-			if self.w_pos == Position(0):
-				self.warehouse_agent_put_ammo()
-				self.w_state = WarehouseState.Idle
-			else:
-				self.w_forward = False
-				self.warehouse_agent_move(self.w_forward)
+			self.w_going_fld()
 	
 	def take_ammo(self, base):
 		ammo = {a_type: a_count for a_type, a_count in base.backline_delivery.ammos.items()}
@@ -538,3 +351,183 @@ class AI(RealtimeAI):
 	
 	def should_w_wait_in_BLD(self, machines, base):
 		return self.f_state == FactoryState.PickingAmmo or (self.total_f_ammo_count(base) > 0) or any(machines[Position(i)].current_ammo == AmmoType.GoldenTankShell and machines[Position(i)].construction_rem_time < 5 for i in range(7, 10))
+	
+	def f_idle(self, base, fagent, machines):
+		if self.f_pos == Position(6):
+			self.rdy_machines += [i for i in range(7, 10) if self.should_go_for(machines[Position(i)]) and i not in self.rdy_machines]
+			if len(self.rdy_machines) > 0:
+				self.f_state = FactoryState.PickingAmmo
+				self.factory_agent_move(True)
+			elif any(machines[Position(i)].current_ammo == AmmoType.GoldenTankShell and machines[Position(i)].status == MachineStatus.Working and machines[Position(i)].construction_rem_time < 6 for i
+			         in range(7, 10)):
+				self.f_state = FactoryState.PickingAmmo
+				self.factory_agent_move(True)
+			elif any(machines[Position(i)].status == MachineStatus.Idle for i in range(7, 10)) and self.total_BLD_material_count(base) > 0:
+				self.f_state = FactoryState.MakingAmmo
+				self.f_making_ammo(base, fagent, machines)
+		else:
+			self.factory_agent_move(False)
+	
+	def f_making_ammo(self, base, fagent, machines):
+		if self.f_pos == Position(6):
+			if len(self.ammo_queue) > 0:
+				for i, a_type in enumerate(self.ammo_queue[0]):
+					if self.can_f_pick_mat(fagent, a_type, base):
+						self.factory_agent_pick_material(base.factory.c_mixture_formulas[a_type])
+						self.ammo_queue[0].pop(i)
+						self.ammo_to_make.append(a_type)
+						return
+			
+			if len(self.ammo_to_make) > 0:
+				self.factory_agent_move(True)
+				if AmmoType.GoldenTankShell in self.ammo_to_make:
+					self.ammo_to_make.remove(AmmoType.GoldenTankShell)
+					self.ammo_to_make.append(AmmoType.GoldenTankShell)
+				self.ammo_queue.pop(0)
+			else:
+				self.f_state = FactoryState.Idle
+				# self.f_idle(base, fagent, machines)
+		elif machines[self.f_pos].status == MachineStatus.AmmoReady:
+			if machines[self.f_pos].current_ammo == AmmoType.GoldenTankShell:
+				self.f_state = FactoryState.GoingToBLD
+			self.factory_agent_pick_ammo()
+			if self.f_pos.index in self.rdy_machines:
+				self.rdy_machines.remove(self.f_pos.index)
+		elif len(self.ammo_to_make) == 0 and machines[self.f_pos].status == MachineStatus.Working and machines[self.f_pos].construction_rem_time <= 5:
+			self.f_state = FactoryState.PickingAmmo
+			self.f_picking_ammo(fagent, machines)
+		elif len(self.ammo_to_make) == 0 or all(machines[Position(i)].status != MachineStatus.Idle for i in range(7, 10)):
+			if any(machines[Position(i)].status == MachineStatus.AmmoReady for i in range(self.f_pos.index + 1, 10)):
+				self.factory_agent_move(True)
+			else:
+				self.f_state = FactoryState.GoingToBLD
+				self.f_going_fld(fagent, machines)
+		elif machines[self.f_pos].status == MachineStatus.Idle and sum(fagent.materials_bag.values()) > 0 and len(self.ammo_to_make) > 0:
+			self.factory_agent_put_material(self.ammo_to_make[0])
+			self.ammo_to_make.pop(0)
+		else:
+			if self.f_pos == Position(9):
+				self.factory_agent_move(False)
+			else:
+				self.factory_agent_move(True)
+	
+	def f_picking_ammo(self, fagent, machines):
+		self.rdy_machines += [i for i in range(7, 10) if self.should_go_for(machines[Position(i)]) and i not in self.rdy_machines]
+		if self.f_pos == Position(6):
+			self.factory_agent_move(True)
+		elif len(self.rdy_machines) == 0:
+			self.f_state = FactoryState.GoingToBLD
+			self.factory_agent_move(False)
+		elif machines[self.f_pos].status == MachineStatus.AmmoReady:
+			if machines[self.f_pos].current_ammo == AmmoType.GoldenTankShell:
+				self.f_state = FactoryState.GoingToBLD
+			self.factory_agent_pick_ammo()
+			if self.f_pos.index in self.rdy_machines:
+				self.rdy_machines.remove(self.f_pos.index)
+		elif machines[self.f_pos].status == MachineStatus.Idle and sum(fagent.materials_bag.values()) > 0 and len(self.ammo_to_make) > 0:
+			self.factory_agent_put_material(self.ammo_to_make[0])
+			self.ammo_to_make.pop(0)
+		elif machines[self.f_pos].current_ammo == AmmoType.GoldenTankShell and machines[self.f_pos].status == MachineStatus.Working and machines[self.f_pos].construction_rem_time < 5:
+			return
+		elif len(self.ammo_to_make) == 0 and machines[self.f_pos].status == MachineStatus.Working and machines[self.f_pos].construction_rem_time < 4 and all(machines[Position(i)].status == MachineStatus.Idle or (machines[Position(i)].status == MachineStatus.Working and machines[Position(i)].construction_rem_time > 7) for i in range(7, 10) if i != self.f_pos.index):
+			return
+		else:
+			if self.should_go_for(machines[Position(9)]) or (self.should_go_for(machines[Position(8)]) and self.f_pos != Position(9)) or (self.should_go_for(machines[Position(7)]) and self.f_pos == Position(6)):
+				self.factory_agent_move(True)
+			else:
+				self.factory_agent_move(False)
+			
+	def f_going_fld(self, fagent, machines):
+		if self.f_pos == Position(6):
+			self.f_state = FactoryState.Idle
+			self.factory_agent_put_ammo()
+		elif machines[self.f_pos].status == MachineStatus.AmmoReady:
+			self.factory_agent_pick_ammo()
+			if self.f_pos.index in self.rdy_machines:
+				self.rdy_machines.remove(self.f_pos.index)
+		elif len(self.ammo_to_make) == 0 and (fagent.ammos_bag[AmmoType.GoldenTankShell] == 0 and machines[self.f_pos].status == MachineStatus.Working and machines[self.f_pos].construction_rem_time < 5):
+			return
+		elif machines[self.f_pos].status == MachineStatus.Idle and sum(fagent.materials_bag.values()) > 0 and len(self.ammo_to_make) > 0:
+			self.factory_agent_put_material(self.ammo_to_make[0])
+			self.ammo_to_make.pop(0)
+		else:
+			self.factory_agent_move(False)
+	
+	def w_idle(self, base, machines):
+		if self.w_pos == Position(0):
+			if self.total_warehouse_material_count(base) > 5:
+				self.w_state = WarehouseState.PickingMaterial
+				self.choose_scheme(base)
+				self.w_forward = True
+				self.warehouse_agent_move(self.w_forward)
+			else:
+				if self.total_BLD_ammo_count(base) > 0:
+					self.w_state = WarehouseState.BringingAmmo
+				self.w_forward = True
+				self.warehouse_agent_move(self.w_forward)
+		elif self.w_pos == Position(6):
+			if self.f_state != FactoryState.GoingToBLD and self.f_state != FactoryState.Idle and base.backline_delivery.ammos[AmmoType.GoldenTankShell] > 0:
+				self.take_ammo(base)
+			elif self.should_w_wait_in_BLD(machines, base):
+				return
+			elif self.total_BLD_ammo_count(base) > 0 and (self.f_state == FactoryState.MakingAmmo or (self.f_state == FactoryState.Idle and self.total_f_ammo_count(base) == 0)):
+				self.take_ammo(base)
+			else:
+				if self.total_warehouse_material_count(base) > 5:
+					self.w_state = WarehouseState.PickingMaterial
+					self.choose_scheme(base)
+					self.w_forward = False
+					self.warehouse_agent_move(self.w_forward)
+				elif base.warehouse.materials_reload_rem_time <= 15:
+					self.w_state = WarehouseState.GoingToFLD
+					self.w_forward = False
+					self.warehouse_agent_move(self.w_forward)
+
+	def w_picking_material(self, base, wagent, machines):
+		if self.w_pos == Position(6):
+			if sum(wagent.materials_bag.values()) > 0:
+				self.warehouse_agent_put_material()
+			elif self.f_state != FactoryState.GoingToBLD and self.f_state != FactoryState.Idle and base.backline_delivery.ammos[AmmoType.GoldenTankShell] > 0:
+				self.take_ammo(base)
+			elif self.should_w_wait_in_BLD(machines, base):
+				return
+			elif self.total_BLD_ammo_count(base) > 0 and (self.f_state == FactoryState.MakingAmmo or (self.f_state == FactoryState.Idle and self.total_f_ammo_count(base) == 0)):
+				self.take_ammo(base)
+			else:
+				self.w_state = WarehouseState.Idle
+				self.w_idle(base, machines)
+		else:
+			mat_type = base.warehouse.materials[self.w_pos].type
+			if base.warehouse.materials[self.w_pos].count > 0 and wagent.materials_bag[mat_type] < self.picking_scheme[mat_type] and self.can_w_pick_mat(wagent):
+				self.warehouse_agent_pick_material()
+			elif self.w_pos == Position(1) and not self.w_forward:
+				self.w_state = WarehouseState.GoingToBLD
+				self.w_forward = True
+				self.warehouse_agent_move(self.w_forward)
+			else:
+				self.warehouse_agent_move(self.w_forward)
+	
+	def w_going_bld(self, base, wagent, machines):
+		if self.w_pos == Position(6):
+			if sum(wagent.materials_bag.values()) > 0:
+				self.warehouse_agent_put_material()
+			elif self.f_state != FactoryState.GoingToBLD and self.f_state != FactoryState.Idle and base.backline_delivery.ammos[AmmoType.GoldenTankShell] > 0:
+				self.take_ammo(base)
+			elif self.should_w_wait_in_BLD(machines, base):
+				return
+			elif self.total_BLD_ammo_count(base) > 0 and (self.f_state == FactoryState.MakingAmmo or (self.f_state == FactoryState.Idle and self.total_f_ammo_count(base) == 0)):
+				self.take_ammo(base)
+			else:
+				self.w_state = WarehouseState.Idle
+				# self.w_idle(base, machines)
+		else:
+			self.w_forward = True
+			self.warehouse_agent_move(self.w_forward)
+	
+	def w_going_fld(self):
+		if self.w_pos == Position(0):
+			self.warehouse_agent_put_ammo()
+			self.w_state = WarehouseState.Idle
+		else:
+			self.w_forward = False
+			self.warehouse_agent_move(self.w_forward)

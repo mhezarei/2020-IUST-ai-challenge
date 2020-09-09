@@ -42,7 +42,7 @@
 		"start_time": "2017-11-08 00:50",
 		"start_waiting_time": 1,
 		"": "realtime game handler configs",
-		"cycle_duration": 0.1,
+		"cycle_duration": 0.05,
 		"first_cycle_duration": 3,
 		"max_total_commands": 200,
 		"max_team_commands": 100,
