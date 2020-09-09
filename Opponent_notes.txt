@@ -1,56 +1,123 @@
-the godfather: 70023, 40002, and repeating
-	goes to the beginning every time and comes to BLD
-	0/0/0/20/5 = 25 ;; btw 11 of these mortars are useless
-	748
-	cycle 265
+ALLIN BABY:
 
 anaar: 70023, 43302, 50021, 50023, 70024, 12201, 60025
 	picks up on the going back and comes to BLD.
-	1/5/2/6/4 = 18
+	1/5/2/6/4 = 18 actual 1/4/2/4/3
 	860
 	cycle 223
 
-niktech: 62222, 60003, 62222, 60004, 70025, 70024, 20002
-	goes to the end then BLD
-	0/5/2/7/4 = 18
-	5204
-	cycle 207
+the godfather: 70023, 40002, and repeating
+	goes to the beginning every time and comes to BLD
+	0/0/0/20/5 = 25 actual 0/0/0/18/4
+	748
+	cycle 265
 
 nita: 30021, 32203, 10002, 20020, 30002, 10020, 40000, 00003, 30000, 00020
 	picks up then end
-	0/3/1/1/3
+	0/3/1/1/3 = 00101, 01000, 01000, 00010, 00001, 01001
 	i won by 4060
 	cycle 208
 
 qadir: 62222, 20001, 80023, 30001,
 	end then BLD
-	0/0/2/7/4 = 15
+	0/0/2/8/4 = 14 actual 00110, 00011, 00020, 00001, 00001, 00010 = 0/0/1/5/3
 	3288
 	cycle 212
 
 sadegh: 53321, 70020, 00206, 00226, 00006,
 	doesn't pick up the second time lmao (just first round :D)
 	pick then BLD
-	1/7/2/4/2 = 16 (actually 1/4/2/3/1 = 11)
+	1/7/1/4/4 = 17 actual 10100, 01011, 01111, 01010, 01001 = 1/4/1/3/3
 	1084
 	cycle 247
 
 the_dark: 62222, 60003, 62222, 60004, 70025, 70024, 20002
 	end then pick then BLD
-	0/5/2/8/4 = 19
+	0/5/2/8/4 = 19 actual 00110 42, 00031 72, 00111 107, 01020 136, 02001 172 = 0/3/2/7/3
 	5204
 	cycle 207
 
 thunder: 62223, 43303, 33402, 40020, 60020, 42200, 20020,
 	pick then end then BLD
-	1/0/4/8/4 = 17
+	1/0/4/7/4 = 17 actual 00110, 10111, 00001, 00020, 00101, 00020, 00110 = 1/0/4/7/3
 	2586
 	cycle 223
 
 waw: 30021, 12200, repeating
 	end then picking up
-	0/0/5/0/5 = 10
+	0/0/5/0/5 = 10 actual 00101, 00100, 00001, 00001, 00100, 00100, 00001 = 0/0/4/0/4
 	180 - 680
 	cycle 300
 
-ME MYSELF: now i have 1/4/2/12/5 which seems promising.
+ME MYSELF: back then i had 2/6/2/2/4
+    now i have 1/4/2/12/5 which seems promising.
+    give Gtank as fast as possible
+    00010 35, 00011 59, 00011 97, 01110 125, 01011 164, 00020 193, 02001 232, 02001 271 = 0/6/1/7/5
+    00010 35, 00011 64, 00111 103, 01110 131, 01011 170, 00020 199, 02001 238, 03000 269 = 0/6/1/7/5
+
+some match analysis:
+	godfather:
+		lost to thunder 1820, the dark 5950 and qadir 2940
+		the difference seems to be more tanks and 2 less hmg
+	thunder:
+		lost to qadir 2178 and the dark 2352
+		i guess too many gmd hurts. like 2 is enough
+	nita team:
+		lost to dark army 2080, thunder 3100, godfather 5300, qadir 6052, sargdsra 320-1280, waw 820-180 and the dark 4772
+		won from sadegh 380
+
+
+LASTSTAND BABY:
+
+anaar:
+	51102, 52203 backing, 31101, 32202, 20002, 20001, 01100, 11100, doesn't matter (only soldier)
+	10020 40, 01100 61, 10010 85, 01000 104, 10010 121, 10000 149, 00010 164, 10000 178, 10000 210, 10000 240, 10000 271 = 9/2/1/5/0
+	432 - 1100
+	cycle 300
+
+dark army:
+	43301, 42201 backing, 30001, 23301, 42201 backing, 33301, 51103, 51103, 51100, 11103, 51103 backing, 51110 backing,
+	10110 39, 10010 59, 10120 104, 10010 130, 10110 156, 11010 182, 11010 205, 31010 271 = 10/3/3/9/0
+	2088
+
+gayadev:
+	43301, 52203 backing, 43301, 51103, 51103, 61122, 53321, 51103, 62223
+	10110 42, 01110 68, 10110 93, 11010 118, 11010 145, 10010 174, 10101 199, 11011 229 = 7/4/4/7/2
+	1460
+
+nita:
+	34400, 51102 backing, 51103, 51103, 51102, 42201, 40003
+	20100 39, 10020 64, 11010 89, 11010 113, 10020 137, 20010 159 = 8/2/1/7/0
+	6424
+	cycle 173
+
+thunder:
+	43404, 32100 backing, 43200, 61200, 40006, 60000, 60003,
+	30000 42, 20010 66, 20010 90, 00020 115, 00030 136, 00030 160 = 7/0/0/10/0
+	6372
+	cycle 193
+
+ME MYSELF:
+	33300, 52203 backing, 51103, 51103, 51103, 51102, 51102, 51102, 51102
+	30000 41, 01110 66, 11010 91, 11010 116, 11010 40, 10020 164, 10020 188 = 8/4/1/8/0
+
+UTBP:
+	43301, 43302 backing, 51103, 51103, 51103, 43302, 43302, 43302, 43302,
+	00110 63, 10000 89, 21100 116, 01020 142, 21000 170, 11010 214, 11100 260, 11100 289
+	utter trash
+	1260 - 1100
+	cycle 300
+
+sargdsra:
+	51102, 52200 backing, 00002, 51102, 34300, 20002, 40004, 00100, 10000, 12200, 22200, 22200,
+	10020 39, 10000, 10020 78, 10020 103, 10020 143, 20000 171, 20000 186, 20000 226, 20000 266,
+	utter trash
+	cycle 300
+	348 - 1100
+
+pain:
+	54401 no backing, 62202, 53301 backing, 44400, 44400,
+	20010 41, 00100 56, 10020 106, 20010 135, 50000 170, 10000 184, 40000 207,
+	utter fucking trash
+	cycle 300
+	1068 - 1100
