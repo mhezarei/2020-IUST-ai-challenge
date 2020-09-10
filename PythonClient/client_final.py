@@ -34,8 +34,6 @@ class AI(RealtimeAI):
 		self.ammo_choice_cnt = {AmmoType.RifleBullet: 0, AmmoType.TankShell: 0, AmmoType.HMGBullet: 0, AmmoType.MortarShell: 0, AmmoType.GoldenTankShell: 0}
 		self.max_ammo_choice_cnt = {}
 		
-		self.op_ammo_choice_cnt = {AmmoType.RifleBullet: 0, AmmoType.TankShell: 0, AmmoType.HMGBullet: 0, AmmoType.MortarShell: 0, AmmoType.GoldenTankShell: 0}
-		
 		self.w_state = WarehouseState.Idle
 		self.picking_scheme = {MaterialType.Powder: 0, MaterialType.Iron: 0, MaterialType.Carbon: 0, MaterialType.Gold: 0, MaterialType.Shell: 0}
 		
@@ -53,6 +51,7 @@ class AI(RealtimeAI):
 		
 		self.map = ""
 		self.all_ammo_choices = {}
+		self.all_op_ammo_choices = {}
 	
 	def initialize(self):
 		print('initialize client ai')
@@ -70,10 +69,11 @@ class AI(RealtimeAI):
 			self.find_map(base)
 		
 		if len(op_base.frontline_deliveries) > 0 and op_base.frontline_deliveries[0].delivery_rem_time == op_base.frontline_deliveries[0].c_delivery_duration:
-			print("OP PICKED", op_base.frontline_deliveries[0].ammos, "AT", self.current_cycle - 8)
+			self.all_op_ammo_choices[self.current_cycle - 8] = op_base.frontline_deliveries[0].ammos
 		
 		if self.current_cycle == 300 or self.world.total_healths[self.my_side] == 0 or self.world.total_healths[self.other_side] == 0:
-			print("\n".join([str(k) + " " + str(v.values()) for k, v in self.all_ammo_choices.items()]))
+			print("\n".join([str(k) + " " + str(list(v.values())) for k, v in self.all_ammo_choices.items()]))
+			print(" OP\n".join([str(k) + " " + str(list(v.values())) for k, v in self.all_op_ammo_choices.items()]))
 			print("CLIENT CHOSEN AMMO", self.ammo_choice_cnt)
 		
 		self.check_and_ban_ammo(base)
@@ -82,9 +82,10 @@ class AI(RealtimeAI):
 		
 		self.warehouse_agent_handler(base, wagent, machines)
 		
-		print(self.w_state)
-		print(self.f_state)
+		# print(self.w_state)
+		# print(self.f_state)
 	
+		# print(self.banned_ammo)
 	# Warehouse Agent Commands
 	
 	def warehouse_agent_move(self, forward):
@@ -132,10 +133,10 @@ class AI(RealtimeAI):
 					self.map = "NoTime"
 				elif self.world.max_cycles == 300:
 					self.map = "AllIn"
-					self.max_ammo_choice_cnt = {AmmoType.RifleBullet: 0, AmmoType.TankShell: 3, AmmoType.HMGBullet: 0, AmmoType.MortarShell: 100, AmmoType.GoldenTankShell: 100}
+					self.max_ammo_choice_cnt = {AmmoType.RifleBullet: 1, AmmoType.TankShell: 100, AmmoType.HMGBullet: 1, AmmoType.MortarShell: 100, AmmoType.GoldenTankShell: 100}
 		elif count == 40:
 			self.map = "LastStand"
-			self.max_ammo_choice_cnt = {AmmoType.RifleBullet: 100, AmmoType.TankShell: 5, AmmoType.HMGBullet: 1, AmmoType.MortarShell: 100, AmmoType.GoldenTankShell: 0}
+			self.max_ammo_choice_cnt = {AmmoType.RifleBullet: 100, AmmoType.TankShell: 100, AmmoType.HMGBullet: 1, AmmoType.MortarShell: 100, AmmoType.GoldenTankShell: 0}
 		elif count == 6:
 			self.map = "Artileryyyy"
 		elif count == 50:
@@ -164,14 +165,14 @@ class AI(RealtimeAI):
 	def check_and_ban_ammo(self, base):
 		for unit in base.units.values():
 			a_type = self.unit_ammo[unit.type]
-			soldier = unit.type == UnitType.Soldier and (unit.health <= 3 * unit.c_individual_health or self.ammo_choice_cnt[a_type] >= self.max_ammo_choice_cnt[a_type])
+			soldier = unit.type == UnitType.Soldier and (unit.health <= 2 * unit.c_individual_health or self.ammo_choice_cnt[a_type] >= self.max_ammo_choice_cnt[a_type])
 			tank = unit.type == UnitType.Tank and (unit.health <= unit.c_individual_health or self.ammo_choice_cnt[a_type] >= self.max_ammo_choice_cnt[a_type])
 			hmg = unit.type == UnitType.HeavyMachineGunner and (unit.health <= unit.c_individual_health or self.ammo_choice_cnt[a_type] >= self.max_ammo_choice_cnt[a_type])
 			mortar = unit.type == UnitType.Mortar and (unit.health <= unit.c_individual_health or self.ammo_choice_cnt[a_type] >= self.max_ammo_choice_cnt[a_type])
 			gtank = unit.type == UnitType.GoldenTank and unit.health <= 50
 			if a_type not in self.banned_ammo and (soldier or tank or hmg or mortar or gtank):
 				self.banned_ammo.append(a_type)
-				print("REMOVED", a_type)
+				print("CLIENT REMOVED", a_type)
 	
 	def merge_sum_dicts(self, A, B):
 		return {x: A.get(x, 0) + B.get(x, 0) for x in set(A).union(B)}
@@ -263,6 +264,29 @@ class AI(RealtimeAI):
 				print("YES BANNED FROM FUTURE IS", unit)
 				self.banned_ammo.append(self.unit_ammo[unit])
 	
+	def choose_predefined(self):
+		temp = []
+		if self.map == "LastStand":
+			if self.current_cycle < 5:
+				temp = [AmmoType.RifleBullet, AmmoType.RifleBullet, AmmoType.RifleBullet]
+			if 5 < self.current_cycle < 30:
+				temp = [AmmoType.MortarShell, AmmoType.RifleBullet, AmmoType.RifleBullet]
+			if 30 < self.current_cycle < 50:
+				temp = [AmmoType.MortarShell, AmmoType.HMGBullet, AmmoType.RifleBullet]
+		
+		if self.map == "AllIn":
+			if self.current_cycle < 5:
+				temp = [AmmoType.GoldenTankShell, AmmoType.HMGBullet, AmmoType.RifleBullet]
+			if 5 < self.current_cycle < 30:
+				temp = [AmmoType.MortarShell, AmmoType.MortarShell]
+			if 30 < self.current_cycle < 55:
+				temp = [AmmoType.GoldenTankShell, AmmoType.MortarShell, AmmoType.MortarShell]
+		
+		if all(ammo not in self.banned_ammo for ammo in temp):
+			return temp
+		else:
+			return []
+	
 	def choose_scheme(self, base):
 		self.predict_ammo_ban(30, base, self.world.bases[self.other_side])
 		
@@ -285,21 +309,8 @@ class AI(RealtimeAI):
 			if break_cond:
 				break
 		
-		if self.map == "LastStand":
-			if self.current_cycle < 5:
-				ammo_sequence = [AmmoType.RifleBullet, AmmoType.RifleBullet, AmmoType.RifleBullet]
-			if 5 < self.current_cycle < 30:
-				ammo_sequence = [AmmoType.MortarShell, AmmoType.RifleBullet, AmmoType.RifleBullet]
-			if 30 < self.current_cycle < 50:
-				ammo_sequence = [AmmoType.MortarShell, AmmoType.MortarShell, AmmoType.RifleBullet]
-		
-		if self.map == "AllIn":
-			if self.current_cycle < 5:
-				ammo_sequence = [AmmoType.GoldenTankShell, AmmoType.HMGBullet, AmmoType.RifleBullet]
-			if 5 < self.current_cycle < 30:
-				ammo_sequence = [AmmoType.MortarShell, AmmoType.RifleBullet]
-			if 30 < self.current_cycle < 55:
-				ammo_sequence = [AmmoType.GoldenTankShell, AmmoType.MortarShell, AmmoType.MortarShell]
+		if len(self.choose_predefined()) > 0:
+			ammo_sequence = self.choose_predefined()
 
 		scheme = self.zero_scheme.copy()
 		for ammo in ammo_sequence:
@@ -313,7 +324,7 @@ class AI(RealtimeAI):
 		self.picking_scheme = scheme.copy()
 		if len(ammo_sequence) > 0:
 			self.ammo_queue.append(ammo_sequence.copy())
-		print("CLIENT SCHEME AMMO", self.picking_scheme, ammo_sequence)
+		# print("CLIENT SCHEME AMMO", self.picking_scheme, ammo_sequence)
 	
 	def should_go_for(self, machine):
 		return machine.status == MachineStatus.AmmoReady or 1 <= machine.construction_rem_time <= 6

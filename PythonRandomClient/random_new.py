@@ -121,10 +121,10 @@ class AI(RealtimeAI):
 					self.map = "NoTime"
 				elif self.world.max_cycles == 300:
 					self.map = "AllIn"
-					self.max_ammo_choice_cnt = {AmmoType.RifleBullet: 0, AmmoType.TankShell: 2, AmmoType.HMGBullet: 1, AmmoType.MortarShell: 100, AmmoType.GoldenTankShell: 100}
+					self.max_ammo_choice_cnt = {AmmoType.RifleBullet: 0, AmmoType.TankShell: 3, AmmoType.HMGBullet: 2, AmmoType.MortarShell: 100, AmmoType.GoldenTankShell: 100}
 		elif count == 40:
 			self.map = "LastStand"
-			self.max_ammo_choice_cnt = {AmmoType.RifleBullet: 100, AmmoType.TankShell: 5, AmmoType.HMGBullet: 1, AmmoType.MortarShell: 100, AmmoType.GoldenTankShell: 0}
+			self.max_ammo_choice_cnt = {AmmoType.RifleBullet: 100, AmmoType.TankShell: 100, AmmoType.HMGBullet: 1, AmmoType.MortarShell: 100, AmmoType.GoldenTankShell: 0}
 		elif count == 6:
 			self.map = "Artileryyyy"
 		elif count == 50:
@@ -197,7 +197,7 @@ class AI(RealtimeAI):
 			return (self.w_pos == Position(6) and self.current_cycle >= 0 and length == 2) or \
 					(self.w_pos == Position(6) and self.current_cycle < 0 and length == 1) or \
 					(self.w_pos == Position(0) and (self.current_cycle < 45 or self.current_cycle > 55) and length == 3) or \
-					(self.w_pos == Position(0) and 55 >= self.current_cycle >= 45 and length == 2)
+					(self.w_pos == Position(0) and 55 >= self.current_cycle >= 45 and length == 3)
 		elif self.map == "LastStand":
 			return (self.w_pos == Position(6) and self.current_cycle >= 0 and length == 3) or \
 			       (self.w_pos == Position(6) and self.current_cycle < 0 and length == 2) or \
@@ -252,6 +252,29 @@ class AI(RealtimeAI):
 				print("YES BANNED FROM FUTURE IS", unit)
 				self.banned_ammo.append(self.unit_ammo[unit])
 	
+	def choose_predefined(self):
+		temp = []
+		if self.map == "LastStand":
+			if self.current_cycle < 5:
+				temp = [AmmoType.RifleBullet, AmmoType.RifleBullet, AmmoType.RifleBullet]
+			if 5 < self.current_cycle < 30:
+				temp = [AmmoType.MortarShell, AmmoType.RifleBullet, AmmoType.RifleBullet]
+			if 30 < self.current_cycle < 50:
+				temp = [AmmoType.MortarShell, AmmoType.RifleBullet, AmmoType.RifleBullet]
+		
+		if self.map == "AllIn":
+			if self.current_cycle < 5:
+				temp = [AmmoType.GoldenTankShell, AmmoType.HMGBullet, AmmoType.MortarShell]
+			if 5 < self.current_cycle < 30:
+				temp = [AmmoType.MortarShell, AmmoType.MortarShell, AmmoType.MortarShell]
+			if 30 < self.current_cycle < 55:
+				temp = [AmmoType.GoldenTankShell, AmmoType.HMGBullet, AmmoType.MortarShell]
+				
+		if all(ammo not in self.banned_ammo for ammo in temp):
+			return temp
+		else:
+			return []
+	
 	def choose_scheme(self, base):
 		self.predict_ammo_ban(30, base, self.world.bases[self.other_side])
 		
@@ -274,21 +297,8 @@ class AI(RealtimeAI):
 			if break_cond:
 				break
 		
-		if self.map == "LastStand":
-			if self.current_cycle < 5:
-				ammo_sequence = [AmmoType.RifleBullet, AmmoType.RifleBullet, AmmoType.RifleBullet]
-			if 5 < self.current_cycle < 30:
-				ammo_sequence = [AmmoType.MortarShell, AmmoType.RifleBullet, AmmoType.RifleBullet]
-			if 30 < self.current_cycle < 50:
-				ammo_sequence = [AmmoType.MortarShell, AmmoType.MortarShell, AmmoType.RifleBullet]
-		
-		if self.map == "AllIn":
-			if self.current_cycle < 5:
-				ammo_sequence = [AmmoType.GoldenTankShell, AmmoType.HMGBullet, AmmoType.MortarShell]
-			if 5 < self.current_cycle < 30:
-				ammo_sequence = [AmmoType.MortarShell, AmmoType.MortarShell, AmmoType.MortarShell]
-			# if 30 < self.current_cycle < 55:
-			# 	ammo_sequence = [AmmoType.GoldenTankShell, AmmoType.MortarShell, AmmoType.MortarShell]
+		if len(self.choose_predefined()) > 0:
+			ammo_sequence = self.choose_predefined()
 
 		scheme = self.zero_scheme.copy()
 		for ammo in ammo_sequence:
@@ -302,6 +312,7 @@ class AI(RealtimeAI):
 		self.picking_scheme = scheme.copy()
 		if len(ammo_sequence) > 0:
 			self.ammo_queue.append(ammo_sequence.copy())
+		print("YO GOT THIS", self.picking_scheme)
 	
 	def should_go_for(self, machine):
 		return machine.status == MachineStatus.AmmoReady or 1 <= machine.construction_rem_time <= 6
