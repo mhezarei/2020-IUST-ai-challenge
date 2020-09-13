@@ -3,3 +3,9 @@ predict the future in scheme and make decisions based on that. like is unit ammo
 
 find best strategy,
 give current strategy to random and try to fuck it :D
+
+pick less if gtank is ready or near ready.
+
+checking points:
+3/3 for 2/2 or 3/2 or 2/3
+surviving units. try out different numbers to see how much is enough.
