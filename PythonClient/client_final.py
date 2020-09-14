@@ -141,7 +141,7 @@ class AI(RealtimeAI):
 			self.max_ammo_choice_cnt = {AmmoType.RifleBullet: 100, AmmoType.TankShell: 100, AmmoType.HMGBullet: 1, AmmoType.MortarShell: 100, AmmoType.GoldenTankShell: 0}
 		elif count == 6:
 			self.map = "Artileryyyy"
-			self.max_ammo_choice_cnt = {AmmoType.RifleBullet: 0, AmmoType.TankShell: 2, AmmoType.HMGBullet: 2, AmmoType.MortarShell: 100, AmmoType.GoldenTankShell: 0}
+			self.max_ammo_choice_cnt = {AmmoType.RifleBullet: 0, AmmoType.TankShell: 2, AmmoType.HMGBullet: 1, AmmoType.MortarShell: 100, AmmoType.GoldenTankShell: 0}
 		elif count == 50:
 			self.map = "Ghosts"
 		elif count == 10:
@@ -163,10 +163,10 @@ class AI(RealtimeAI):
 			# self.predefined_ammo.append([AmmoType.TankShell, AmmoType.HMGBullet])
 			# self.predefined_ammo.append([AmmoType.TankShell, AmmoType.HMGBullet, AmmoType.MortarShell])
 			# self.predefined_ammo.append([AmmoType.MortarShell, AmmoType.MortarShell, AmmoType.MortarShell])
-			self.predefined_ammo.append([AmmoType.TankShell, AmmoType.HMGBullet])
-			self.predefined_ammo.append([AmmoType.TankShell, AmmoType.HMGBullet, AmmoType.MortarShell])
+			self.predefined_ammo.append([AmmoType.TankShell, AmmoType.MortarShell, AmmoType.HMGBullet])
 			self.predefined_ammo.append([AmmoType.MortarShell, AmmoType.MortarShell, AmmoType.MortarShell])
-			
+			self.predefined_ammo.append([AmmoType.TankShell, AmmoType.MortarShell])
+
 	def total_warehouse_material_count(self, base):
 		return sum(base.warehouse.materials[Position(i)].count for i in range(1, 6))
 	
