@@ -71,9 +71,9 @@ class AI(RealtimeAI):
 			self.make_predefined()
 		
 		if len(op_base.frontline_deliveries) > 0 and op_base.frontline_deliveries[0].delivery_rem_time == op_base.frontline_deliveries[0].c_delivery_duration:
-			self.all_op_ammo_choices[self.current_cycle - 8] = op_base.frontline_deliveries[0].ammos
+			self.all_op_ammo_choices[self.current_cycle - 7] = op_base.frontline_deliveries[0].ammos
 		
-		if self.current_cycle == 300 or self.world.total_healths[self.my_side] <= 0 or self.world.total_healths[self.other_side] <= 0:
+		if self.current_cycle == self.world.max_cycles or self.world.total_healths[self.my_side] <= 0 or self.world.total_healths[self.other_side] <= 0:
 			print("\n".join([str(k) + " " + str(list(v.values())) for k, v in self.all_ammo_choices.items()]))
 			print(" OP\n".join([str(k) + " " + str(list(v.values())) for k, v in self.all_op_ammo_choices.items()]))
 			print("CLIENT CHOSEN AMMO", self.ammo_choice_cnt)
@@ -88,6 +88,7 @@ class AI(RealtimeAI):
 		print(self.f_state)
 	
 		# print(self.banned_ammo)
+	
 	# Warehouse Agent Commands
 	
 	def warehouse_agent_move(self, forward):
@@ -124,49 +125,6 @@ class AI(RealtimeAI):
 	
 	# My functions
 	
-	def find_map(self, base):
-		count = math.ceil(base.units[UnitType.Soldier].health / base.units[UnitType.Soldier].c_individual_health)
-		ammo_count = base.units[UnitType.Soldier].ammo_count
-		if count == 19:
-			if ammo_count == 100:
-				self.map = "WhoNeedsTank"
-			elif ammo_count == 50:
-				if self.world.max_cycles == 150:
-					self.map = "NoTime"
-				elif self.world.max_cycles == 300:
-					self.map = "AllIn"
-					self.max_ammo_choice_cnt = {AmmoType.RifleBullet: 1, AmmoType.TankShell: 100, AmmoType.HMGBullet: 1, AmmoType.MortarShell: 100, AmmoType.GoldenTankShell: 100}
-		elif count == 40:
-			self.map = "LastStand"
-			self.max_ammo_choice_cnt = {AmmoType.RifleBullet: 100, AmmoType.TankShell: 100, AmmoType.HMGBullet: 1, AmmoType.MortarShell: 100, AmmoType.GoldenTankShell: 0}
-		elif count == 6:
-			self.map = "Artileryyyy"
-			self.max_ammo_choice_cnt = {AmmoType.RifleBullet: 0, AmmoType.TankShell: 2, AmmoType.HMGBullet: 1, AmmoType.MortarShell: 100, AmmoType.GoldenTankShell: 0}
-		elif count == 50:
-			self.map = "Ghosts"
-		elif count == 10:
-			self.map = "PanzerStorm"
-			
-	def make_predefined(self):
-		if self.map == "LastStand":
-			self.predefined_ammo.append([AmmoType.RifleBullet, AmmoType.RifleBullet, AmmoType.RifleBullet])
-			self.predefined_ammo.append([AmmoType.MortarShell, AmmoType.RifleBullet, AmmoType.RifleBullet])
-			self.predefined_ammo.append([AmmoType.MortarShell, AmmoType.HMGBullet, AmmoType.RifleBullet])
-		elif self.map == "AllIn":
-			self.predefined_ammo.append([AmmoType.GoldenTankShell, AmmoType.HMGBullet, AmmoType.RifleBullet])
-			self.predefined_ammo.append([AmmoType.MortarShell, AmmoType.MortarShell])
-			self.predefined_ammo.append([AmmoType.GoldenTankShell, AmmoType.MortarShell, AmmoType.MortarShell])
-		elif self.map == "Artileryyyy":
-			# self.predefined_ammo.append([AmmoType.MortarShell, AmmoType.HMGBullet, AmmoType.TankShell])
-			# self.predefined_ammo.append([AmmoType.MortarShell, AmmoType.MortarShell, AmmoType.MortarShell])
-			# self.predefined_ammo.append([AmmoType.TankShell, AmmoType.MortarShell, AmmoType.MortarShell])
-			# self.predefined_ammo.append([AmmoType.TankShell, AmmoType.HMGBullet])
-			# self.predefined_ammo.append([AmmoType.TankShell, AmmoType.HMGBullet, AmmoType.MortarShell])
-			# self.predefined_ammo.append([AmmoType.MortarShell, AmmoType.MortarShell, AmmoType.MortarShell])
-			self.predefined_ammo.append([AmmoType.TankShell, AmmoType.MortarShell, AmmoType.HMGBullet])
-			self.predefined_ammo.append([AmmoType.MortarShell, AmmoType.MortarShell, AmmoType.MortarShell])
-			self.predefined_ammo.append([AmmoType.TankShell, AmmoType.MortarShell])
-
 	def total_warehouse_material_count(self, base):
 		return sum(base.warehouse.materials[Position(i)].count for i in range(1, 6))
 	
@@ -185,6 +143,15 @@ class AI(RealtimeAI):
 				can_do = False
 		return can_do and sum(base.factory.c_mixture_formulas[ammo_type].values()) + sum(fagent.materials_bag.values()) <= fagent.c_materials_bag_capacity
 	
+	def merge_sum_dicts(self, A, B):
+		return {x: A.get(x, 0) + B.get(x, 0) for x in set(A).union(B)}
+	
+	def sub_dicts(self, A, B):
+		temp = A.copy()
+		for mat in B.keys():
+			temp[Position(mat.value + 1)].count -= B[mat]
+		return temp
+	
 	def check_and_ban_ammo(self, base):
 		for unit in base.units.values():
 			a_type = self.unit_ammo[unit.type]
@@ -196,30 +163,6 @@ class AI(RealtimeAI):
 			if a_type not in self.banned_ammo and (soldier or tank or hmg or mortar or gtank):
 				self.banned_ammo.append(a_type)
 				print("CLIENT REMOVED", a_type)
-	
-	def merge_sum_dicts(self, A, B):
-		return {x: A.get(x, 0) + B.get(x, 0) for x in set(A).union(B)}
-	
-	def sub_dicts(self, A, B):
-		temp = A.copy()
-		for mat in B.keys():
-			temp[Position(mat.value + 1)].count -= B[mat]
-		return temp
-	
-	def can_make_ammo(self, ammo, base, materials, ammo_seq):
-		mix = base.factory.c_mixture_formulas[ammo]
-		summ = sum(base.factory.c_mixture_formulas[ammo].values())
-		for am in ammo_seq:
-			summ += sum(base.factory.c_mixture_formulas[am].values())
-		if summ > 15:
-			return False
-		
-		answer = ammo not in self.banned_ammo and self.ammo_choice_cnt[ammo] < self.max_ammo_choice_cnt[ammo]
-		if not answer:
-			return False
-		for mat, cnt in mix.items():
-			answer = answer and (cnt <= materials[Position(mat.value + 1)].count or (cnt > materials[Position(mat.value + 1)].count and base.warehouse.materials_reload_rem_time < 10))
-		return answer
 	
 	def predict_ammo_ban(self, cycles, my_base, op_base):
 		dmg_dist = [[x / 10 for x in sub] for sub in [[6, 0, 1, 3, 0], [2, 5, 1, 1, 1], [4, 0, 2, 4, 0], [2, 3, 2, 2, 1], [1, 3, 1, 2, 3]]]
@@ -269,35 +212,106 @@ class AI(RealtimeAI):
 				print("YES BANNED FROM FUTURE IS", unit)
 				self.banned_ammo.append(self.unit_ammo[unit])
 	
-	def choose_possible_ammo(self):
-		if self.map == "AllIn":
-			return [AmmoType.GoldenTankShell] + [AmmoType.HMGBullet] * self.max_ammo_choice_cnt[AmmoType.HMGBullet] + [AmmoType.MortarShell, AmmoType.RifleBullet, AmmoType.TankShell]
-		elif self.map == "LastStand":
-			return [AmmoType.HMGBullet] * self.max_ammo_choice_cnt[AmmoType.HMGBullet] + [AmmoType.TankShell, AmmoType.MortarShell, AmmoType.RifleBullet]
-		elif self.map == "Artileryyyy":
-			return [AmmoType.HMGBullet] * self.max_ammo_choice_cnt[AmmoType.HMGBullet] + [AmmoType.RifleBullet] * self.max_ammo_choice_cnt[AmmoType.RifleBullet] + [AmmoType.TankShell, AmmoType.MortarShell, AmmoType.RifleBullet]
+	def find_map(self, base):
+		count = math.ceil(base.units[UnitType.Soldier].health / base.units[UnitType.Soldier].c_individual_health)
+		ammo_count = base.units[UnitType.Soldier].ammo_count
+		if self.world.max_cycles == 150:
+			self.map = "NoTime"
+			self.max_ammo_choice_cnt = {AmmoType.RifleBullet: 0, AmmoType.TankShell: 100, AmmoType.HMGBullet: 1, AmmoType.MortarShell: 100, AmmoType.GoldenTankShell: 2}
+		elif count == 19 and ammo_count == 100:
+			self.map = "WhoNeedsTank"
+		elif count == 19 and ammo_count == 50:
+			self.map = "AllIn"
+			self.max_ammo_choice_cnt = {AmmoType.RifleBullet: 1, AmmoType.TankShell: 100, AmmoType.HMGBullet: 1, AmmoType.MortarShell: 100, AmmoType.GoldenTankShell: 100}
+		elif count == 40:
+			self.map = "LastStand"
+			self.max_ammo_choice_cnt = {AmmoType.RifleBullet: 100, AmmoType.TankShell: 100, AmmoType.HMGBullet: 1, AmmoType.MortarShell: 100, AmmoType.GoldenTankShell: 0}
+		elif count == 6:
+			self.map = "Artileryyyy"
+			self.max_ammo_choice_cnt = {AmmoType.RifleBullet: 0, AmmoType.TankShell: 2, AmmoType.HMGBullet: 1, AmmoType.MortarShell: 100, AmmoType.GoldenTankShell: 0}
+		elif count == 50:
+			self.map = "Ghosts"
+		elif count == 10:
+			self.map = "PanzerStorm"
 	
+	def make_predefined(self):
+		if self.map == "NoTime":
+			# self.predefined_ammo.append([AmmoType.GoldenTankShell, AmmoType.HMGBullet])
+			# self.predefined_ammo.append([AmmoType.MortarShell, AmmoType.MortarShell])
+			# self.predefined_ammo.append([AmmoType.GoldenTankShell, AmmoType.MortarShell])
+			self.predefined_ammo.append([AmmoType.GoldenTankShell])
+			self.predefined_ammo.append([AmmoType.HMGBullet, AmmoType.TankShell, AmmoType.MortarShell])
+			self.predefined_ammo.append([AmmoType.GoldenTankShell])
+			self.predefined_ammo.append([AmmoType.MortarShell])
+			self.predefined_ammo.append([AmmoType.TankShell, AmmoType.MortarShell])
+			self.predefined_ammo.append([AmmoType.MortarShell])
+		if self.map == "LastStand":
+			self.predefined_ammo.append([AmmoType.RifleBullet, AmmoType.RifleBullet, AmmoType.RifleBullet])
+			self.predefined_ammo.append([AmmoType.MortarShell, AmmoType.RifleBullet, AmmoType.RifleBullet])
+			self.predefined_ammo.append([AmmoType.MortarShell, AmmoType.HMGBullet, AmmoType.RifleBullet])
+		if self.map == "AllIn":
+			self.predefined_ammo.append([AmmoType.GoldenTankShell, AmmoType.HMGBullet, AmmoType.RifleBullet])
+			self.predefined_ammo.append([AmmoType.MortarShell, AmmoType.MortarShell])
+			self.predefined_ammo.append([AmmoType.GoldenTankShell, AmmoType.MortarShell, AmmoType.MortarShell])
+		if self.map == "Artileryyyy":
+			# self.predefined_ammo.append([AmmoType.TankShell, AmmoType.HMGBullet])
+			# self.predefined_ammo.append([AmmoType.TankShell, AmmoType.HMGBullet, AmmoType.MortarShell])
+			# self.predefined_ammo.append([AmmoType.MortarShell, AmmoType.MortarShell, AmmoType.MortarShell])
+			self.predefined_ammo.append([AmmoType.TankShell, AmmoType.MortarShell, AmmoType.HMGBullet])
+			self.predefined_ammo.append([AmmoType.MortarShell, AmmoType.MortarShell, AmmoType.MortarShell])
+			self.predefined_ammo.append([AmmoType.TankShell, AmmoType.MortarShell])
+	
+	def choose_possible_ammo(self):
+		if self.map == "NoTime":
+			return [AmmoType.GoldenTankShell] + [AmmoType.HMGBullet] * self.max_ammo_choice_cnt[AmmoType.HMGBullet] + [AmmoType.MortarShell, AmmoType.TankShell, AmmoType.RifleBullet]
+		if self.map == "AllIn":
+			return [AmmoType.GoldenTankShell] + [AmmoType.HMGBullet] * self.max_ammo_choice_cnt[AmmoType.HMGBullet] + [AmmoType.MortarShell, AmmoType.TankShell, AmmoType.RifleBullet]
+		if self.map == "LastStand":
+			return [AmmoType.HMGBullet] * self.max_ammo_choice_cnt[AmmoType.HMGBullet] + [AmmoType.TankShell, AmmoType.MortarShell, AmmoType.RifleBullet]
+		if self.map == "Artileryyyy":
+			return [AmmoType.HMGBullet] * self.max_ammo_choice_cnt[AmmoType.HMGBullet] + [AmmoType.RifleBullet] * self.max_ammo_choice_cnt[AmmoType.RifleBullet] + [AmmoType.TankShell, AmmoType.MortarShell, AmmoType.RifleBullet]
+		
 	def choose_break_cond(self, length):
+		if self.map == "NoTime":
+			return (self.w_pos == Position(6) and self.current_cycle >= 0 and length == 2) or \
+					(self.w_pos == Position(6) and self.current_cycle < 0 and length == 1) or \
+					(self.w_pos == Position(0) and (self.current_cycle < 45 or self.current_cycle > 55) and length == 2) or \
+					(self.w_pos == Position(0) and 55 >= self.current_cycle >= 45 and length == 2)
 		if self.map == "AllIn":
 			return (self.w_pos == Position(6) and self.current_cycle >= 0 and length == 2) or \
 					(self.w_pos == Position(6) and self.current_cycle < 0 and length == 1) or \
 					(self.w_pos == Position(0) and (self.current_cycle < 45 or self.current_cycle > 55) and length == 3) or \
 					(self.w_pos == Position(0) and 55 >= self.current_cycle >= 45 and length == 3)
-		elif self.map == "LastStand":
+		if self.map == "LastStand":
 			return (self.w_pos == Position(6) and self.current_cycle >= 0 and length == 3) or \
 			       (self.w_pos == Position(6) and self.current_cycle < 0 and length == 2) or \
 			       (self.w_pos == Position(0) and self.current_cycle >= 0 and length == 3) or \
 			       (self.w_pos == Position(0) and self.current_cycle < 0 and length == 2)
-		elif self.map == "Artileryyyy":
+		if self.map == "Artileryyyy":
 			return (self.w_pos == Position(6) and self.current_cycle >= 0 and length == 3) or \
 			       (self.w_pos == Position(6) and self.current_cycle < 0 and length == 2) or \
 			       (self.w_pos == Position(0) and self.current_cycle >= 0 and length == 3) or \
 			       (self.w_pos == Position(0) and self.current_cycle < 0 and length == 2)
-		
+	
 	def choose_predefined(self):
 		temp = self.predefined_ammo[0].copy()
 		self.predefined_ammo.pop(0)
 		return temp if all(ammo not in self.banned_ammo for ammo in temp) else []
+	
+	def can_make_ammo(self, ammo, base, materials, ammo_seq):
+		mix = base.factory.c_mixture_formulas[ammo]
+		summ = sum(base.factory.c_mixture_formulas[ammo].values())
+		for am in ammo_seq:
+			summ += sum(base.factory.c_mixture_formulas[am].values())
+		if summ > 15:
+			return False
+		
+		answer = ammo not in self.banned_ammo and self.ammo_choice_cnt[ammo] < self.max_ammo_choice_cnt[ammo]
+		if not answer:
+			return False
+		for mat, cnt in mix.items():
+			answer = answer and (cnt <= materials[Position(mat.value + 1)].count or (cnt > materials[Position(mat.value + 1)].count and base.warehouse.materials_reload_rem_time < 10))
+		return answer
 	
 	def choose_scheme(self, base):
 		self.predict_ammo_ban(30, base, self.world.bases[self.other_side])
@@ -378,7 +392,7 @@ class AI(RealtimeAI):
 						break
 		self.warehouse_agent_pick_ammo(ammo)
 		self.w_state = WarehouseState.BringingAmmo
-		self.all_ammo_choices[self.current_cycle] = ammo.copy()
+		self.all_ammo_choices[self.current_cycle + 1] = ammo.copy()
 	
 	def total_BLD_material_count(self, base):
 		return sum(base.backline_delivery.materials.values())
@@ -484,7 +498,6 @@ class AI(RealtimeAI):
 			if self.f_pos.index in self.rdy_machines:
 				self.rdy_machines.remove(self.f_pos.index)
 		elif not self.ammo_to_make and self.f_pos.index < 9 and self.should_go_for(machines[Position(self.f_pos.index + 1)]):
-			print(self.should_go_for(machines[Position(self.f_pos.index + 1)]))
 			self.factory_agent_move(True)
 		elif not self.ammo_to_make and (fagent.ammos_bag[AmmoType.GoldenTankShell] == 0 and machines[self.f_pos].status == MachineStatus.Working and machines[self.f_pos].construction_rem_time < 5):
 			return
@@ -496,7 +509,9 @@ class AI(RealtimeAI):
 	
 	def w_idle(self, base, machines):
 		if self.w_pos == Position(0):
-			if self.total_warehouse_material_count(base) > 5:
+			if self.map == "NoTime" and 35 <= self.current_cycle <= 42:
+				return
+			elif self.total_warehouse_material_count(base) > 5:
 				self.w_state = WarehouseState.PickingMaterial
 				self.choose_scheme(base)
 				self.w_forward = True
@@ -507,7 +522,11 @@ class AI(RealtimeAI):
 				self.w_forward = True
 				self.warehouse_agent_move(self.w_forward)
 		elif self.w_pos == Position(6):
-			if self.f_state != FactoryState.GoingToBLD and self.f_state != FactoryState.Idle and base.backline_delivery.ammos[AmmoType.GoldenTankShell] > 0:
+			if self.map == "NoTime" and 25 <= self.current_cycle <= 37:
+				self.w_state = WarehouseState.GoingToFLD
+				self.w_forward = False
+				self.warehouse_agent_move(self.w_forward)
+			elif self.f_state != FactoryState.GoingToBLD and self.f_state != FactoryState.Idle and base.backline_delivery.ammos[AmmoType.GoldenTankShell] > 0:
 				self.take_ammo(base)
 			elif self.should_w_wait_in_BLD(machines, base):
 				return
