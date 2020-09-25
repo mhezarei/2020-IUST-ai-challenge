@@ -133,3 +133,197 @@ mahor:
 ME MYSELF:
 	53321, 40002, 70023, 40003, 70024, 40002, 70024, 20002,
 	10100 39, 00021 66, 00020 88, 01011 116, 01010 137, 00021 165, 01010 184, 01001 209 = 1/4/1/9/4
+
+
+NEW LASTSTAND BABY:
+
+nita:
+	20100 39, 10020 64, 11010 89, 11010 113, 10000 134, 01000 169, 01000 188, 01000 207, 01000 226 = 6/6/1/4/0
+
+ME MYSELF:
+	30000 37, 20010 63, 10110 88, 11010 113, 11010 138, 21000 164, 12000 189, 21000 213, ...
+
+
+UPPER BRACKET:
+	LastStand matches:
+		only mahor is good.
+
+		ME MYSELF:
+			30000 37, 20010 59, 10010 81, 11000 102, 00020 124, 01010 143, 01000 166, 02000 185, 01000 208, 02000 227
+
+		pain (cuz the dark is shit. takes 4 at a time):
+			20010 37, 20010 61, 20010 87, 00120 111, 20010 134, 02000 162, 03000 190, 03000 239
+
+		thunder:
+			30000 37, 20010 61, 20010 85, 30000 109, 00030 131, 01010 159, 03000 207
+
+		godfather:
+			30000 37, 20010 63, 10110 88, 11010 113, 11010 138, 11010 163, 11010 188
+
+		nita:
+			20100 39, 10020 64, 11010 89, 11010 113, 10020 137, 20010 157
+
+		mahor:
+			30000 37, 20010 60, 20000 82, 01010 101, 01000 120, 01000 142, 01010 161, 01000 183, 01010 204
+
+		dark army:
+			30000 37, 20010 63, 10110 89, 02010 115, 02010 137, 02010 179, 01000 195, 01010 229
+
+	Artileryyyy matches:
+		thunder dark army 3; godfather sarg 1
+
+		ME MYSELF now:
+			00120 39, 00030 63, 00030 87, 00030 111, 00030 135, 00030 159, 00030 183, 00030 203, 00030 247, 00030 271
+
+		thunder: all 00030
+			00030 37, 00030 63, 00030 87, 00030 116, 00030 140, 00030 166, 00030 190, 00030 216, 00030 240, 00030 266
+
+		dark army:
+			00120 39, 00030 63, 00030 87, 00030 111, 00030 135, 00030 159, 00030 183, 00030 207, 00030 232, 00030 250
+
+	WhoNeedsTank matches:
+		godfather sarg 2; mahor utbp 1
+
+		ME MYSELF now:
+			00120 37, 00020 58, 00020 76, 00010 94, 00020 112, 00020 130, 00010 148, 00010 166, 00010 184, 00010 202, ...
+
+		godfather:
+			00120 39, 00030 65, 00120 89, 00030 113, 00030 137
+
+		mahor:
+			00120 37, 00020 58, 00020 81, 00110 99, 00010 117, 00010 135, 00010 153, 00010 171, 00010 189, 00010 207, ...
+
+	PanzerStorm matches:
+		mahor dark army 3; pain dark army 1; qadir gaya 2; the dark pain 1
+
+		pain:
+			00001 50, 00001 107, 02000 165, 00001 184, 00001 207
+
+		qadir:
+			01000 37, 01001 59, 01000 78, 01001 97, 02000 135
+
+		dark army:
+			10000 36, 01001 61, 01000 83, 01001 101, 01000 138, 01000 161
+
+		mahor:
+			01001 57, 01000 76, 01001 107, 01001 157
+
+	NoTime matches:
+		mahor dark army 1; thunder dark army 1; mahor godfather 3; qadir ME 1; dark army anaar 2
+
+		ME MYSELF now:
+			00010 37, 00101 56, 00011 92, 00010 110, 00010 128 = 0/0/1/4/2
+
+		dark army:
+			10100 39, 00021 60, 01011 102, 00020 127 = 1/1/1/5/2
+
+		mahor:
+			00010 33, 00101 58, 00010 76, 00011 94, 00010 112, 00010 130 = 0/0/1/5/2
+
+		qadir:
+			00110 39, 00001 64, 00001 92, 00020 109, 00010 123 = 0/0/1/4/2
+
+		godfather:
+			00110 39, 00021 68, 00020 88, 00001 106 = 0/0/1/5/2
+
+	AllIn matches:
+		mahor ME 1; mahor godfather 1; qadir ME game 2; nita waw 2; thunder sadegh 1;
+
+		ME MYSELF now:
+			10100 40, 00011 58, 00011 94, 00010 111, 00011 148, 02000 173, 01000 205 = 1/2/1/4/3
+
+		mahor:
+			00110 36, 00011 65, 00020 84, 01001 107, 00011 143, 01000 161, 00010 180, 01000 198 = 0/3/1/6/3
+
+		godfather:
+			00110 39, 00021 68, 00020 88, 00001 106, 00001 142, 02000 163, 02000 183 = 0/4/1/5/3
+
+		qadir:
+			00110 39, 00021 60, 00011 97, 01010 118, 01010 137, 01000 153, 01000 202 = 0/4/1/6/3
+
+		nita:
+			00110 39, 00021 64, 00010 85, 00021 109, 00010 131, 00011 149, 00010 169 = 0/0/1/9/3
+
+		thunder:
+			00110 39, 00021 68, 00020 88, 00001 107, 00011 143, 02010 167 = 0/2/1/7/3
+
+
+LOWER BRACKET BABY:
+
+	AllIn
+		mine best:
+			01000 41, 00111 58, 00011 94, 00010 111, 00011 148, 02000 169, 01001 208
+
+		godfather: i win
+			00110 39, 00021 68, 00020 88, 00001 106, 00001 142, 02000 163, 02000 183 = 0/4/1/5/3
+
+		thunder: i win                                                                                  IMPORTANT
+			00110 39, 00021 68, 00020 88, 00001 107, 00011 143, 01010 157 STOPS = 0/2/1/6/3
+
+	PanzerStorm:
+		mine 92/145:
+			10000 36, 01001 56, 00001 92, 01000 109, 00001 145, 02000 165
+
+		qadir: i think i win
+			01001 56, 00001 92, 01000 109, 00001 145
+
+		thunder: i win                                                                                  IMPORTANT
+			02001 57, 00001 96, 03000 118, 01001 169
+
+		godfather: i win
+			02001 58, 01001 97, 02001 158,
+
+	NoTime:
+		best mine:
+			00100 37, 00011 56, 00011 92, 01010 110, 00010 128 = 0/1/1/4/2  , 00010 146
+
+		nita: i think i win                                                                             IMPORTANT
+			00110 39, 00001 64, 00001 92, 00010 107, 00010 139 = 0/0/1/3/2
+
+		qadir: i think i win
+			00110 39, 00001 64, 00001 92, 00020 109, 00010 123 = 0/0/1/4/2
+
+
+BANS AND PICKS
+	Thunder:
+		bans: notime 2, allin , panzer 1, who 1, art 1, last , ghosts 1
+		picks: notime , allin 1, panzer , who , art , last 2, ghosts
+
+		now:
+		bans: notime 1, allin , panzer , who , art 1, last , ghosts
+		picks: notime , allin , panzer 1, who , art , last , ghosts
+
+	nita:
+		bans: notime 1, allin , panzer , who 1, art , last , ghosts 2
+		picks: notime 1, allin , panzer , who , art , last 1, ghosts
+
+		now:
+		bans: notime , allin , panzer , who 1, art , last , ghosts 1
+		picks: notime , allin 1, panzer , who , art , last , ghosts
+
+	godfather:
+		bans: notime , allin , panzer , who 2, art 1, last , ghosts 3
+		picks: notime , allin 2, panzer , who , art , last 1, ghosts
+
+		now:
+		bans: notime 1, allin , panzer , who , art , last , ghosts
+		picks: notime , allin , panzer , who , art 1, last , ghosts
+
+	qadir:
+		bans: notime1, allin , panzer , who 1, art 2, last 2
+		picks: notime 1, allin 1, panzer , who , art , last
+
+		now:
+		bans: notime , allin , panzer , who 1, art , last , ghosts 1
+		picks: notime , allin 1, panzer , who , art , last 1, ghosts
+
+		bans: notime , allin , panzer , who 1, art , last , ghosts
+		picks: notime 1, allin , panzer , who , art 1, last , ghosts
+
+	pain:
+		bans: notime 2, allin 2, panzer 1, who , art 1, last 1
+		picks: notime 1, allin 1, panzer 1, who , art , last 1
+
+		now:
+		bans: notime , allin , panzer , who , art , last 1
+		picks: notime , allin 1, panzer , who , art , last

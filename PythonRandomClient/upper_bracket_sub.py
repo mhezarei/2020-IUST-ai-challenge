@@ -54,7 +54,6 @@ class AI(RealtimeAI):
 		self.all_op_ammo_choices = {}
 		self.all_picking_schemes = []
 		self.predefined_ammo = []
-		self.max_len = 0
 	
 	def initialize(self):
 		print('initialize client ai')
@@ -71,17 +70,15 @@ class AI(RealtimeAI):
 		if self.current_cycle == 0:
 			self.find_map(base)
 			self.make_predefined()
-			
+		
 		if len(op_base.frontline_deliveries) > 0 and op_base.frontline_deliveries[0].delivery_rem_time == op_base.frontline_deliveries[0].c_delivery_duration:
 			self.all_op_ammo_choices[self.current_cycle - 7] = op_base.frontline_deliveries[0].ammos
 		
-		if self.current_cycle == self.world.max_cycles or self.world.total_healths[self.my_side] <= 0 or self.world.total_healths[self.other_side] <= 0:
-			print("\n".join([str(s) for s in self.all_picking_schemes]))
-			print()
-			print("\n".join([str(k) + " " + str(list(v.values())) for k, v in self.all_ammo_choices.items()]))
-			print()
-			print(" OP\n".join([str(k) + " " + str(list(v.values())) for k, v in self.all_op_ammo_choices.items()]))
-			print("CLIENT CHOSEN AMMO", self.ammo_choice_cnt)
+		# if self.current_cycle == self.world.max_cycles or self.world.total_healths[self.my_side] <= 0 or self.world.total_healths[self.other_side] <= 0:
+		# 	print("\n".join([str(s) for s in self.all_picking_schemes]))
+		# 	print("\n".join([str(k) + " " + str(list(v.values())) for k, v in self.all_ammo_choices.items()]))
+		# 	print(" OP\n".join([str(k) + " " + str(list(v.values())) for k, v in self.all_op_ammo_choices.items()]))
+		# 	print("CLIENT CHOSEN AMMO", self.ammo_choice_cnt)
 		
 		self.check_and_ban_ammo(base)
 		
@@ -92,7 +89,7 @@ class AI(RealtimeAI):
 		print(self.w_state)
 		print(self.f_state)
 	
-		# print(self.banned_ammo)
+	# print(self.banned_ammo)
 	
 	# Warehouse Agent Commands
 	
@@ -164,7 +161,7 @@ class AI(RealtimeAI):
 			tank = unit.type == UnitType.Tank and (unit.health <= unit.c_individual_health or self.ammo_choice_cnt[a_type] >= self.max_ammo_choice_cnt[a_type])
 			hmg = unit.type == UnitType.HeavyMachineGunner and (unit.health <= unit.c_individual_health or self.ammo_choice_cnt[a_type] >= self.max_ammo_choice_cnt[a_type])
 			mortar = unit.type == UnitType.Mortar and (unit.health <= unit.c_individual_health or self.ammo_choice_cnt[a_type] >= self.max_ammo_choice_cnt[a_type])
-			gtank = unit.type == UnitType.GoldenTank and (unit.health <= 50 or self.ammo_choice_cnt[a_type] >= self.max_ammo_choice_cnt[a_type])
+			gtank = unit.type == UnitType.GoldenTank and unit.health <= 50
 			if a_type not in self.banned_ammo and (soldier or tank or hmg or mortar or gtank):
 				self.banned_ammo.append(a_type)
 				print("CLIENT REMOVED", a_type)
@@ -214,7 +211,7 @@ class AI(RealtimeAI):
 		
 		for i, unit in enumerate(UnitType):
 			if count[i] == 0 and self.unit_ammo[unit] not in self.banned_ammo:
-				print("BANNED (FROM FUTURE)", unit)
+				print("YES BANNED FROM FUTURE IS", unit)
 				self.banned_ammo.append(self.unit_ammo[unit])
 	
 	def find_map(self, base):
@@ -222,65 +219,65 @@ class AI(RealtimeAI):
 		ammo_count = base.units[UnitType.Soldier].ammo_count
 		if self.world.max_cycles == 150:
 			self.map = "NoTime"
-			self.max_ammo_choice_cnt = {AmmoType.RifleBullet: 10, AmmoType.TankShell: 10, AmmoType.HMGBullet: 10, AmmoType.MortarShell: 100, AmmoType.GoldenTankShell: 2}
+			self.max_ammo_choice_cnt = {AmmoType.RifleBullet: 0, AmmoType.TankShell: 0, AmmoType.HMGBullet: 1, AmmoType.MortarShell: 100, AmmoType.GoldenTankShell: 2}
 		elif count == 19 and ammo_count == 50:
 			self.map = "AllIn"
-			self.max_ammo_choice_cnt = {AmmoType.RifleBullet: 0, AmmoType.TankShell: 100, AmmoType.HMGBullet: 1, AmmoType.MortarShell: 4, AmmoType.GoldenTankShell: 100}
+			self.max_ammo_choice_cnt = {AmmoType.RifleBullet: 1, AmmoType.TankShell: 100, AmmoType.HMGBullet: 1, AmmoType.MortarShell: 4, AmmoType.GoldenTankShell: 100}
+		elif count == 40:
+			self.map = "LastStand"
+			self.max_ammo_choice_cnt = {AmmoType.RifleBullet: 6, AmmoType.TankShell: 100, AmmoType.HMGBullet: 1, AmmoType.MortarShell: 100, AmmoType.GoldenTankShell: 0}
 		elif count == 50:
 			self.map = "Ghosts"
 			self.max_ammo_choice_cnt = {AmmoType.RifleBullet: 2, AmmoType.TankShell: 100, AmmoType.HMGBullet: 4, AmmoType.MortarShell: 0, AmmoType.GoldenTankShell: 100}
-		elif count == 40:
-			self.map = "LastStand"
-			self.max_ammo_choice_cnt = {AmmoType.RifleBullet: 6, AmmoType.TankShell: 100, AmmoType.HMGBullet: 0, AmmoType.MortarShell: 100, AmmoType.GoldenTankShell: 0}
-		elif count == 6:
-			self.map = "Artileryyyy"
-			self.max_ammo_choice_cnt = {AmmoType.RifleBullet: 0, AmmoType.TankShell: 0, AmmoType.HMGBullet: 1, AmmoType.MortarShell: 100, AmmoType.GoldenTankShell: 0}
 		elif count == 19 and ammo_count == 100:
 			self.map = "WhoNeedsTank"
-			self.max_ammo_choice_cnt = {AmmoType.RifleBullet: 0, AmmoType.TankShell: 0, AmmoType.HMGBullet: 1, AmmoType.MortarShell: 100, AmmoType.GoldenTankShell: 0}
+			# the best
+			self.max_ammo_choice_cnt = {AmmoType.RifleBullet: 1, AmmoType.TankShell: 2, AmmoType.HMGBullet: 2, AmmoType.MortarShell: 100, AmmoType.GoldenTankShell: 0}
 		elif count == 10:
+			# the best
 			self.map = "PanzerStorm"
-			self.max_ammo_choice_cnt = {AmmoType.RifleBullet: 1, AmmoType.TankShell: 100, AmmoType.HMGBullet: 0, AmmoType.MortarShell: 0, AmmoType.GoldenTankShell: 3}
-	
-	def get_ammo_from_numeric(self, num_list):
-		temp = []
-		for i, a_type in enumerate(AmmoType):
-			if num_list[i] > 0:
-				temp += num_list[i] * [a_type]
-		return temp
+			self.max_ammo_choice_cnt = {AmmoType.RifleBullet: 1, AmmoType.TankShell: 100, AmmoType.HMGBullet: 0, AmmoType.MortarShell: 0, AmmoType.GoldenTankShell: 100}
+		elif count == 6:
+			# the best
+			self.map = "Artileryyyy"
+			self.max_ammo_choice_cnt = {AmmoType.RifleBullet: 0, AmmoType.TankShell: 0, AmmoType.HMGBullet: 1, AmmoType.MortarShell: 100, AmmoType.GoldenTankShell: 0}
 	
 	def make_predefined(self):
 		if self.map == "Artileryyyy":
-			lst = [[0, 0, 1, 2, 0], [0, 0, 0, 2, 0], [0, 0, 0, 3, 0], [0, 0, 0, 3, 0], [0, 0, 0, 2, 0], [0, 0, 0, 2, 0], [0, 0, 0, 2, 0], [0, 0, 0, 2, 0]]
-			for hai in lst:
-				self.predefined_ammo.append(self.get_ammo_from_numeric(hai))
-		
-		if self.map == "WhoNeedsTank":
-			lst = [[0, 0, 1, 2, 0], [0, 0, 0, 2, 0], [0, 0, 0, 2, 0], [0, 0, 0, 1, 0]]
-			for hai in lst:
-				self.predefined_ammo.append(self.get_ammo_from_numeric(hai))
-		
-		if self.map == "LastStand":
-			lst = [[3, 0, 0, 0, 0], [2, 0, 0, 1, 0], [1, 0, 0, 1, 0], [0, 1, 0, 0, 0], [0, 0, 0, 2, 0]]
-			for hai in lst:
-				self.predefined_ammo.append(self.get_ammo_from_numeric(hai))
-		
-		if self.map == "AllIn":
-			lst = [[0, 1, 0, 0, 1], [0, 0, 1, 1, 0], [0, 0, 0, 0, 1], [0, 0, 0, 1, 0], [0, 0, 0, 1, 0], [0, 0, 0, 0, 1]]
-			for hai in lst:
-				self.predefined_ammo.append(self.get_ammo_from_numeric(hai))
-			
-		if self.map == "NoTime":
-			lst = [[0, 0, 1, 0, 1], [0, 0, 0, 1, 0], [0, 0, 0, 0, 1], [0, 0, 0, 1, 0], [0, 1, 0, 1, 0], [0, 0, 0, 1, 0]]  # w idle is 45
-			for hai in lst:
-				self.predefined_ammo.append(self.get_ammo_from_numeric(hai))
-		
+			# the best
+			# self.predefined_ammo.append([AmmoType.TankShell, AmmoType.HMGBullet])
+			# self.predefined_ammo.append([AmmoType.TankShell, AmmoType.HMGBullet, AmmoType.MortarShell])
+			# self.predefined_ammo.append([AmmoType.MortarShell, AmmoType.MortarShell, AmmoType.MortarShell])
+			self.predefined_ammo.append([AmmoType.MortarShell, AmmoType.MortarShell, AmmoType.HMGBullet])
+			self.predefined_ammo.append([AmmoType.MortarShell, AmmoType.MortarShell, AmmoType.MortarShell])
+			self.predefined_ammo.append([AmmoType.MortarShell, AmmoType.MortarShell, AmmoType.MortarShell])
 		if self.map == "PanzerStorm":
-			lst = [[1, 0, 0, 0, 1], [0, 1, 0, 0, 0], [0, 0, 0, 0, 1], [0, 1, 0, 0, 0], [0, 0, 0, 0, 1]]  # one enable
-			for hai in lst:
-				self.predefined_ammo.append(self.get_ammo_from_numeric(hai))
-		
+			# the best
+			self.predefined_ammo.append([AmmoType.GoldenTankShell, AmmoType.RifleBullet])
+			self.predefined_ammo.append([AmmoType.TankShell, AmmoType.TankShell])
+			self.predefined_ammo.append([AmmoType.GoldenTankShell])
+			self.predefined_ammo.append([AmmoType.TankShell, AmmoType.TankShell])
+			self.predefined_ammo.append([AmmoType.GoldenTankShell])
+		# self.predefined_ammo.append([AmmoType.GoldenTankShell, AmmoType.RifleBullet, AmmoType.TankShell])
+		# self.predefined_ammo.append([AmmoType.TankShell, AmmoType.RifleBullet])
+		# self.predefined_ammo.append([AmmoType.GoldenTankShell, AmmoType.TankShell])
+		# self.predefined_ammo.append([AmmoType.TankShell])
+		# self.predefined_ammo.append([AmmoType.GoldenTankShell, AmmoType.TankShell, AmmoType.TankShell])
+		if self.map == "WhoNeedsTank":
+			# the best
+			self.predefined_ammo.append([AmmoType.RifleBullet, AmmoType.TankShell, AmmoType.HMGBullet])
+			self.predefined_ammo.append([AmmoType.MortarShell, AmmoType.MortarShell, AmmoType.MortarShell])
+			self.predefined_ammo.append([AmmoType.TankShell, AmmoType.HMGBullet])
+		if self.map == "LastStand":
+			self.predefined_ammo.append([AmmoType.RifleBullet, AmmoType.RifleBullet, AmmoType.RifleBullet])
+			self.predefined_ammo.append([AmmoType.MortarShell, AmmoType.RifleBullet, AmmoType.RifleBullet])
+			self.predefined_ammo.append([AmmoType.MortarShell, AmmoType.HMGBullet, AmmoType.RifleBullet])
+		# self.predefined_ammo.append([AmmoType.RifleBullet, AmmoType.RifleBullet, AmmoType.HMGBullet])
+		# self.predefined_ammo.append([AmmoType.MortarShell, AmmoType.MortarShell, AmmoType.RifleBullet])
+		# self.predefined_ammo.append([AmmoType.MortarShell, AmmoType.TankShell, AmmoType.RifleBullet])
+		# self.predefined_ammo.append([AmmoType.MortarShell, AmmoType.TankShell, AmmoType.RifleBullet])
 		if self.map == "Ghosts":
+			# currently the best is HMG, Mortar, 2Rifle but i wanna always ban it.
 			self.predefined_ammo.append([AmmoType.GoldenTankShell, AmmoType.HMGBullet, AmmoType.RifleBullet])
 			self.predefined_ammo.append([AmmoType.HMGBullet, AmmoType.TankShell])
 			self.predefined_ammo.append([AmmoType.GoldenTankShell, AmmoType.HMGBullet])
@@ -288,8 +285,27 @@ class AI(RealtimeAI):
 			self.predefined_ammo.append([AmmoType.GoldenTankShell, AmmoType.TankShell])
 			self.predefined_ammo.append([AmmoType.HMGBullet, AmmoType.TankShell])
 			self.predefined_ammo.append([AmmoType.GoldenTankShell, AmmoType.TankShell])
-			
-		self.max_len = len(self.predefined_ammo.copy())
+		# self.predefined_ammo.append([AmmoType.GoldenTankShell, AmmoType.HMGBullet, AmmoType.RifleBullet])
+		# self.predefined_ammo.append([AmmoType.HMGBullet, AmmoType.MortarShell])
+		# self.predefined_ammo.append([AmmoType.GoldenTankShell, AmmoType.HMGBullet, AmmoType.RifleBullet])
+		# self.predefined_ammo.append([AmmoType.HMGBullet, AmmoType.MortarShell])
+		# self.predefined_ammo.append([AmmoType.GoldenTankShell, AmmoType.MortarShell])
+		# self.predefined_ammo.append([AmmoType.MortarShell, AmmoType.MortarShell])
+		# self.predefined_ammo.append([AmmoType.GoldenTankShell, AmmoType.MortarShell])
+		if self.map == "NoTime":
+			# self.predefined_ammo.append([AmmoType.GoldenTankShell, AmmoType.HMGBullet])
+			# self.predefined_ammo.append([AmmoType.MortarShell, AmmoType.MortarShell])
+			# self.predefined_ammo.append([AmmoType.GoldenTankShell, AmmoType.MortarShell])
+			self.predefined_ammo.append([AmmoType.GoldenTankShell, AmmoType.HMGBullet])
+			self.predefined_ammo.append([AmmoType.MortarShell, AmmoType.MortarShell])
+			self.predefined_ammo.append([AmmoType.GoldenTankShell])
+			self.predefined_ammo.append([AmmoType.MortarShell])
+			self.predefined_ammo.append([AmmoType.MortarShell, AmmoType.MortarShell])
+			self.predefined_ammo.append([AmmoType.MortarShell])
+		if self.map == "AllIn":
+			self.predefined_ammo.append([AmmoType.GoldenTankShell, AmmoType.HMGBullet, AmmoType.RifleBullet])
+			self.predefined_ammo.append([AmmoType.MortarShell, AmmoType.MortarShell])
+			self.predefined_ammo.append([AmmoType.GoldenTankShell, AmmoType.MortarShell, AmmoType.MortarShell])
 	
 	def choose_possible_ammo(self):
 		if self.map == "Ghosts":
@@ -305,19 +321,16 @@ class AI(RealtimeAI):
 		if self.map == "LastStand":
 			return [AmmoType.HMGBullet] * self.max_ammo_choice_cnt[AmmoType.HMGBullet] + [AmmoType.TankShell, AmmoType.MortarShell, AmmoType.RifleBullet]
 		if self.map == "Artileryyyy":
-			return [AmmoType.HMGBullet] * self.max_ammo_choice_cnt[AmmoType.HMGBullet] + [AmmoType.RifleBullet] * self.max_ammo_choice_cnt[AmmoType.RifleBullet] + [AmmoType.TankShell, AmmoType.MortarShell]
-		
+			return [AmmoType.HMGBullet] * self.max_ammo_choice_cnt[AmmoType.HMGBullet] + [AmmoType.RifleBullet] * self.max_ammo_choice_cnt[AmmoType.RifleBullet] + [AmmoType.TankShell,
+			                                                                                                                                                        AmmoType.MortarShell]
+	
 	def choose_break_cond(self, ammo_sequence):
 		length = len(ammo_sequence)
-		if self.map == "LastStand":
-			return (self.w_pos == Position(6) and self.current_cycle >= 0 and length == 2) or \
-			       (self.w_pos == Position(6) and self.current_cycle < 0 and length == 2) or \
-			       (self.w_pos == Position(0) and self.current_cycle >= 0 and length == 2) or \
-			       (self.w_pos == Position(0) and self.current_cycle < 0 and length == 2)
 		if self.map == "Artileryyyy":
+			# the best
 			return (self.w_pos == Position(6) and self.current_cycle >= 0 and length == 3) or \
 			       (self.w_pos == Position(6) and self.current_cycle < 0 and length == 2) or \
-			       (self.w_pos == Position(0) and self.current_cycle >= 0 and length == 2) or \
+			       (self.w_pos == Position(0) and self.current_cycle >= 0 and length == 3) or \
 			       (self.w_pos == Position(0) and self.current_cycle < 0 and length == 2)
 		if self.map == "Ghosts":
 			return (self.w_pos == Position(6) and self.current_cycle >= 0 and length == 2) or \
@@ -325,27 +338,34 @@ class AI(RealtimeAI):
 			       (self.w_pos == Position(0) and self.current_cycle >= 0 and length == 2) or \
 			       (self.w_pos == Position(0) and self.current_cycle < 0 and length == 2)
 		if self.map == "WhoNeedsTank":
+			# the best
 			return (self.w_pos == Position(6) and self.current_cycle >= 0 and length == 2) or \
 			       (self.w_pos == Position(6) and self.current_cycle < 0 and length == 2) or \
-			       (self.w_pos == Position(0) and self.current_cycle >= 0 and length == 1) or \
+			       (self.w_pos == Position(0) and self.current_cycle >= 0 and length == 2) or \
 			       (self.w_pos == Position(0) and self.current_cycle < 0 and length == 2)
 		if self.map == "PanzerStorm":
+			# the best
 			return (self.w_pos == Position(6) and self.current_cycle >= 0 and length == 2) or \
-					(self.w_pos == Position(6) and self.current_cycle < 0 and length == 1) or \
-					(self.w_pos == Position(0) and (self.current_cycle < 45 or self.current_cycle > 55) and length == 1) or \
-					(self.w_pos == Position(0) and AmmoType.GoldenTankShell in ammo_sequence and length == 1) or \
-					(self.w_pos == Position(0) and 175 >= self.current_cycle >= 170 and length == 1)
+			       (self.w_pos == Position(6) and self.current_cycle < 0 and length == 1) or \
+			       (self.w_pos == Position(0) and (self.current_cycle < 45 or self.current_cycle > 55) and length == 3) or \
+			       (self.w_pos == Position(0) and AmmoType.GoldenTankShell in ammo_sequence and length == 1) or \
+			       (self.w_pos == Position(0) and 175 >= self.current_cycle >= 170 and length == 1)
 		if self.map == "NoTime":
 			return (self.w_pos == Position(6) and self.current_cycle >= 0 and length == 2) or \
-					(self.w_pos == Position(6) and self.current_cycle < 0 and length == 1) or \
-					(self.w_pos == Position(0) and (self.current_cycle < 45 or self.current_cycle > 55) and length == 1) or \
-					(self.w_pos == Position(0) and 55 >= self.current_cycle >= 45 and length == 2)
+			       (self.w_pos == Position(6) and self.current_cycle < 0 and length == 1) or \
+			       (self.w_pos == Position(0) and (self.current_cycle < 45 or self.current_cycle > 55) and length == 1) or \
+			       (self.w_pos == Position(0) and 55 >= self.current_cycle >= 45 and length == 2)
 		if self.map == "AllIn":
 			return (self.w_pos == Position(6) and self.current_cycle >= 0 and length == 2) or \
-					(self.w_pos == Position(6) and self.current_cycle < 0 and length == 1) or \
-					(self.w_pos == Position(0) and (self.current_cycle < 45 or self.current_cycle > 55) and length == 2) or \
-					(self.w_pos == Position(0) and 145 >= self.current_cycle >= 140 and length == 1) or \
-					(self.w_pos == Position(0) and self.current_cycle >= 90 and length == 1)
+			       (self.w_pos == Position(6) and self.current_cycle < 0 and length == 1) or \
+			       (self.w_pos == Position(0) and (self.current_cycle < 45 or self.current_cycle > 55) and length == 3) or \
+			       (self.w_pos == Position(0) and 145 >= self.current_cycle >= 140 and length == 1) or \
+			       (self.w_pos == Position(0) and self.current_cycle >= 90 and length == 1)
+		if self.map == "LastStand":
+			return (self.w_pos == Position(6) and self.current_cycle >= 0 and length == 2) or \
+			       (self.w_pos == Position(6) and self.current_cycle < 0 and length == 2) or \
+			       (self.w_pos == Position(0) and self.current_cycle >= 0 and length == 2) or \
+			       (self.w_pos == Position(0) and self.current_cycle < 0 and length == 2)
 	
 	def choose_predefined(self):
 		temp = self.predefined_ammo[0].copy()
@@ -390,6 +410,7 @@ class AI(RealtimeAI):
 			if break_cond:
 				break
 		
+		print("BEFORE", ammo_sequence)
 		if self.predefined_ammo:
 			temp = self.choose_predefined()
 			if temp:
@@ -398,7 +419,7 @@ class AI(RealtimeAI):
 				ammo_sequence = temp.copy()
 				for ammo in ammo_sequence:
 					self.ammo_choice_cnt[ammo] += 1
-		
+		print("AFTER", ammo_sequence)
 		scheme = self.zero_scheme.copy()
 		for ammo in ammo_sequence:
 			scheme = self.merge_sum_dicts(scheme, mixture[ammo])
@@ -406,56 +427,14 @@ class AI(RealtimeAI):
 			if ammo in ammo_sequence:
 				ammo_sequence.insert(i, ammo_sequence.pop(ammo_sequence.index(ammo)))
 		
-		if self.map == "NoTime":
-			if len(self.predefined_ammo) == self.max_len - 2:
-				scheme[MaterialType.Shell] += 1
-				scheme[MaterialType.Powder] += 3
-			elif len(self.predefined_ammo) == self.max_len - 3:
-				scheme[MaterialType.Shell] -= 1
-				scheme[MaterialType.Powder] -= 3
-				
-		if self.map == "AllIn":
-			if len(self.predefined_ammo) == self.max_len - 2 or len(self.predefined_ammo) == self.max_len - 5:
-				scheme[MaterialType.Shell] += 1
-				scheme[MaterialType.Powder] += 3
-			elif len(self.predefined_ammo) == self.max_len - 3 or len(self.predefined_ammo) == self.max_len - 6:
-				scheme[MaterialType.Shell] -= 1
-				scheme[MaterialType.Powder] -= 3
-				
-		if self.map == "PanzerStorm":
-			if len(self.predefined_ammo) == self.max_len - 2 or len(self.predefined_ammo) == self.max_len - 4:
-				print(len(self.predefined_ammo), self.max_len)
-				scheme[MaterialType.Shell] += 1
-				scheme[MaterialType.Powder] += 3
-			elif len(self.predefined_ammo) == self.max_len - 3 or len(self.predefined_ammo) == self.max_len - 5:
-				scheme[MaterialType.Shell] -= 1
-				scheme[MaterialType.Powder] -= 3
-		
-		if len(self.predefined_ammo) == 0 and (self.map == "AllIn" or self.map == "PanzerStorm"):
-			self.max_len = -1
-		
 		self.picking_scheme = scheme.copy()
 		self.all_picking_schemes.append([self.picking_scheme[mat] for mat in self.zero_scheme.keys()])
 		if ammo_sequence:
 			self.ammo_queue.append(ammo_sequence.copy())
-		print("CLIENT SCHEME AMMO", ammo_sequence, len(self.predefined_ammo), self.max_len, self.ammo_choice_cnt)
+		print("CLIENT SCHEME AMMO", ammo_sequence)
 	
 	def should_go_for(self, machine):
 		return machine.status == MachineStatus.AmmoReady or 1 <= machine.construction_rem_time <= 6
-	
-	def f_pick_needed_materials(self, base):
-		temp = self.zero_scheme.copy()
-		for i, a_type in enumerate(self.ammo_queue[0]):
-			temp = self.merge_sum_dicts(temp, base.factory.c_mixture_formulas[a_type])
-		print(temp)
-		self.factory_agent_pick_material(temp)
-		
-	def total_required_materials(self, base):
-		temp = self.zero_scheme.copy()
-		if self.ammo_queue and self.ammo_queue[0]:
-			for i, a_type in enumerate(self.ammo_queue[0]):
-				temp = self.merge_sum_dicts(temp, base.factory.c_mixture_formulas[a_type])
-		return temp
 	
 	# FACTORY AGENT PART
 	
@@ -502,22 +481,21 @@ class AI(RealtimeAI):
 		return sum(base.agents[AgentType.Factory].ammos_bag.values())
 	
 	def should_w_wait_in_BLD(self, machines, base):
-		return self.f_state == FactoryState.PickingAmmo or (self.total_f_ammo_count(base) > 0) or any((machines[Position(i)].status == MachineStatus.AmmoReady) or (machines[Position(i)].current_ammo == AmmoType.GoldenTankShell and machines[Position(i)].construction_rem_time < 5) for i in range(7, 10))
+		return self.f_state == FactoryState.PickingAmmo or (self.total_f_ammo_count(base) > 0) or any(
+			(machines[Position(i)].status == MachineStatus.AmmoReady) or (machines[Position(i)].current_ammo == AmmoType.GoldenTankShell and machines[Position(i)].construction_rem_time < 5) for i in
+			range(7, 10))
 	
 	def f_idle(self, base, fagent, machines):
 		if self.f_pos == Position(6):
 			self.rdy_machines += [i for i in range(7, 10) if self.should_go_for(machines[Position(i)]) and i not in self.rdy_machines]
-			
-			# checking whether we have everything to make the ammo
-			temp = self.total_required_materials(base)
-			
 			if self.rdy_machines:
 				self.f_state = FactoryState.PickingAmmo
 				self.factory_agent_move(True)
-			elif any(machines[Position(i)].current_ammo == AmmoType.GoldenTankShell and machines[Position(i)].status == MachineStatus.Working and machines[Position(i)].construction_rem_time < 6 for i in range(7, 10)):
+			elif any(machines[Position(i)].current_ammo == AmmoType.GoldenTankShell and machines[Position(i)].status == MachineStatus.Working and machines[Position(i)].construction_rem_time < 6 for i
+			         in range(7, 10)):
 				self.f_state = FactoryState.PickingAmmo
 				self.factory_agent_move(True)
-			elif any(machines[Position(i)].status == MachineStatus.Idle for i in range(7, 10)) and all(base.backline_delivery.materials[mat] >= temp[mat] for mat in MaterialType):
+			elif any(machines[Position(i)].status == MachineStatus.Idle for i in range(7, 10)) and self.total_BLD_material_count(base) > 0:
 				self.f_state = FactoryState.MakingAmmo
 				self.f_making_ammo(base, fagent, machines)
 		else:
@@ -525,41 +503,24 @@ class AI(RealtimeAI):
 	
 	def f_making_ammo(self, base, fagent, machines):
 		if self.f_pos == Position(6):
-			# if self.ammo_queue:
-			# 	for i, a_type in enumerate(self.ammo_queue[0]):
-			# 		if self.can_f_pick_mat(fagent, a_type, base):
-			# 			self.factory_agent_pick_material(base.factory.c_mixture_formulas[a_type])
-			# 			self.ammo_queue[0].pop(i)
-			# 			self.ammo_to_make.append(a_type)
-			# 			return
-			
-			if self.ammo_queue and self.ammo_queue[0]:
-				print("YAAAAAYYYYYYYYYYY", self.ammo_queue)
-				temp = self.zero_scheme.copy()
-				# self.f_pick_needed_materials(base)
+			if self.ammo_queue:
 				for i, a_type in enumerate(self.ammo_queue[0]):
 					if self.can_f_pick_mat(fagent, a_type, base):
-						temp = self.merge_sum_dicts(temp, base.factory.c_mixture_formulas[a_type])
-					# self.ammo_queue[0].pop(i)
-					self.ammo_to_make.append(a_type)
-				# return
-				print(temp)
-				if sum(temp.values()) > 0:
-					self.factory_agent_pick_material(temp)
-					self.ammo_queue[0] = []
-					print("PICKED IT", temp)
-					return
+						self.factory_agent_pick_material(base.factory.c_mixture_formulas[a_type])
+						self.ammo_queue[0].pop(i)
+						self.ammo_to_make.append(a_type)
+						return
 			
 			if self.ammo_to_make:
 				print("AMMO TO MAKE", self.ammo_to_make)
 				self.factory_agent_move(True)
-				if AmmoType.GoldenTankShell in self.ammo_to_make and self.map != "NoTime" and self.map != "PanzerStorm" and self.map != "AllIn":
+				if AmmoType.GoldenTankShell in self.ammo_to_make:
 					self.ammo_to_make.remove(AmmoType.GoldenTankShell)
 					self.ammo_to_make.append(AmmoType.GoldenTankShell)
 				self.ammo_queue.pop(0)
 			else:
 				self.f_state = FactoryState.Idle
-				# self.f_idle(base, fagent, machines)
+		# self.f_idle(base, fagent, machines)
 		elif machines[self.f_pos].status == MachineStatus.AmmoReady:
 			if machines[self.f_pos].current_ammo == AmmoType.GoldenTankShell:
 				self.f_state = FactoryState.GoingToBLD
@@ -602,16 +563,19 @@ class AI(RealtimeAI):
 			self.ammo_to_make.pop(0)
 		elif machines[self.f_pos].current_ammo == AmmoType.GoldenTankShell and machines[self.f_pos].status == MachineStatus.Working and machines[self.f_pos].construction_rem_time < 5:
 			return
-		elif self.ammo_to_make and machines[self.f_pos].status == MachineStatus.Working and machines[self.f_pos].construction_rem_time < 4 and all(machines[Position(i)].status == MachineStatus.Idle or (machines[Position(i)].status == MachineStatus.Working and machines[Position(i)].construction_rem_time > 7) for i in range(7, 10) if i != self.f_pos.index):
+		elif self.ammo_to_make and machines[self.f_pos].status == MachineStatus.Working and machines[self.f_pos].construction_rem_time < 4 and all(
+				machines[Position(i)].status == MachineStatus.Idle or (machines[Position(i)].status == MachineStatus.Working and machines[Position(i)].construction_rem_time > 7) for i in range(7, 10)
+				if i != self.f_pos.index):
 			return
 		elif self.f_pos.index > 6 and self.should_go_for(machines[Position(self.f_pos.index)]):
 			return
 		else:
-			if self.should_go_for(machines[Position(9)]) or (self.should_go_for(machines[Position(8)]) and self.f_pos.index <= 7) or (self.should_go_for(machines[Position(7)]) and self.f_pos == Position(6)):
+			if self.should_go_for(machines[Position(9)]) or (self.should_go_for(machines[Position(8)]) and self.f_pos.index <= 7) or (
+					self.should_go_for(machines[Position(7)]) and self.f_pos == Position(6)):
 				self.factory_agent_move(True)
 			else:
 				self.factory_agent_move(False)
-			
+	
 	def f_going_bld(self, fagent, machines):
 		if self.f_pos == Position(6):
 			self.f_state = FactoryState.Idle
@@ -634,20 +598,12 @@ class AI(RealtimeAI):
 	
 	def w_idle(self, base, machines):
 		if self.w_pos == Position(0):
-			if self.map == "NoTime" and 35 <= self.current_cycle <= 45:
+			if self.map == "NoTime" and 35 <= self.current_cycle <= 42:
 				return
-			elif self.map == "LastStand" and (40 <= self.current_cycle <= 44):
+			elif self.map == "PanzerStorm" and 85 <= self.current_cycle <= 92:
 				return
-			# elif self.map == "Artileryyyy" and 80 <= self.current_cycle <= 89:
-			# 	return
-			elif self.map == "AllIn" and (135 <= self.current_cycle <= 144 or 85 <= self.current_cycle <= 92 or 35 <= self.current_cycle <= 45):
+			elif self.map == "AllIn" and (140 <= self.current_cycle <= 144 or 90 <= self.current_cycle <= 92):
 				return
-			elif self.map == "PanzerStorm" and 38 <= self.current_cycle <= 45:
-				return
-			elif self.map == "PanzerStorm" and (60 <= self.current_cycle <= 65 or 110 <= self.current_cycle <= 120):
-				self.w_state = WarehouseState.GoingToBLD
-				self.w_forward = True
-				self.warehouse_agent_move(self.w_forward)
 			elif self.total_warehouse_material_count(base) > 5:
 				self.w_state = WarehouseState.PickingMaterial
 				self.choose_scheme(base)
@@ -656,8 +612,6 @@ class AI(RealtimeAI):
 			else:
 				if self.total_BLD_ammo_count(base) > 0:
 					self.w_state = WarehouseState.BringingAmmo
-					self.w_forward = False
-					self.warehouse_agent_move(self.w_forward)
 				self.w_forward = True
 				self.warehouse_agent_move(self.w_forward)
 		elif self.w_pos == Position(6):
@@ -681,7 +635,7 @@ class AI(RealtimeAI):
 					self.w_state = WarehouseState.GoingToFLD
 					self.w_forward = False
 					self.warehouse_agent_move(self.w_forward)
-
+	
 	def w_picking_material(self, base, wagent, machines):
 		if self.w_pos == Position(6):
 			if sum(wagent.materials_bag.values()) > 0:
@@ -699,9 +653,9 @@ class AI(RealtimeAI):
 			mat_type = base.warehouse.materials[self.w_pos].type
 			if base.warehouse.materials[self.w_pos].count > 0 and wagent.materials_bag[mat_type] < self.picking_scheme[mat_type] and self.can_w_pick_mat(wagent):
 				self.warehouse_agent_pick_material()
-			# elif self.map == "PanzerStorm" and wagent.materials_bag[MaterialType.Gold] == 2:
-			# 	self.w_forward = True
-			# 	self.warehouse_agent_move(self.w_forward)
+			elif self.map == "PanzerStorm" and wagent.materials_bag[MaterialType.Gold] == 2:
+				self.w_forward = True
+				self.warehouse_agent_move(self.w_forward)
 			elif self.w_pos == Position(1) and not self.w_forward:
 				self.w_state = WarehouseState.GoingToBLD
 				self.w_forward = True
@@ -716,17 +670,17 @@ class AI(RealtimeAI):
 			elif self.f_state != FactoryState.GoingToBLD and self.f_state != FactoryState.Idle and base.backline_delivery.ammos[AmmoType.GoldenTankShell] > 0:
 				self.take_ammo(base)
 			elif self.should_w_wait_in_BLD(machines, base):
-				# if self.map == "PanzerStorm" and self.current_cycle == 98:
-				# 	self.w_state = WarehouseState.PickingMaterial
-				# 	self.picking_scheme = {MaterialType.Powder: 0, MaterialType.Gold: 2, MaterialType.Carbon: 0, MaterialType.Iron: 0, MaterialType.Shell: 0}
-				# 	self.w_forward = False
-				# 	self.warehouse_agent_move(self.w_forward)
+				if self.map == "PanzerStorm" and self.current_cycle == 98:
+					self.w_state = WarehouseState.PickingMaterial
+					self.picking_scheme = {MaterialType.Powder: 0, MaterialType.Gold: 2, MaterialType.Carbon: 0, MaterialType.Iron: 0, MaterialType.Shell: 0}
+					self.w_forward = False
+					self.warehouse_agent_move(self.w_forward)
 				return
 			elif self.total_BLD_ammo_count(base) > 0 and (self.f_state == FactoryState.MakingAmmo or (self.f_state == FactoryState.Idle and self.total_f_ammo_count(base) == 0)):
 				self.take_ammo(base)
 			else:
 				self.w_state = WarehouseState.Idle
-				# self.w_idle(base, machines)
+		# self.w_idle(base, machines)
 		else:
 			self.w_forward = True
 			self.warehouse_agent_move(self.w_forward)

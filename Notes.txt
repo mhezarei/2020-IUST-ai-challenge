@@ -1,11 +1,20 @@
-TODO
-predict the future in scheme and make decisions based on that. like is unit ammo running low or does it have enough?
+LastStand:
+find the best ammo
 
-find best strategy,
-give current strategy to random and try to fuck it :D
+NoTime:
+find the best ammo OR improve.                      currently done!
 
-pick less if gtank is ready or near ready.
+Artileryyyy:
+find best ammo but i think it can't be improved     currently done!
 
-checking points:
-3/3 for 2/2 or 3/2 or 2/3
-surviving units. try out different numbers to see how much is enough.
+WhoNeedsTank:
+find best ammo but i think it can't be improved     currently done!
+
+PanzerStorm:
+try all tanks for panzer.                           currently done! one OR one prime OR three? based on OP
+
+AllIn:
+find best ammo OR improve
+
+
+3 gtanks for qadir panzer
